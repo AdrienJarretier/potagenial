@@ -1,59 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+
 <head>
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.6.0/dist/phaser.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>hello phaser!</title>
+  <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
 </head>
+
 <body>
+  <script type="text/javascript">
+  window.onload = function() {
 
-    <script>
-    var config = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 200 }
-            }
-        },
-        scene: {
-            preload: preload,
-            create: create
-        }
-    };
+    //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
+    //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
+    //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
 
-    var game = new Phaser.Game(config);
+    const TARGET_WIDTH = Math.floor(1920 / 2 * 0.9);
 
-    function preload ()
-    {
-        this.load.setBaseURL('http://labs.phaser.io');
+    const CELL_SIZE = 40;
 
-        this.load.image('sky', 'assets/skies/space3.png');
-        this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-        this.load.image('red', 'assets/particles/red.png');
+    const ASPECT_RATIO = 16 / 9;
+
+    const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
+    const LIGS = Math.floor(COLS / ASPECT_RATIO);
+
+    var width = COLS * CELL_SIZE;
+    var height = LIGS * CELL_SIZE;
+
+    console.log("COLS : " + COLS);
+    console.log("LIGS : " + LIGS);
+
+    var cell = { type: 0 };
+
+    var gameGrid = [];
+
+    for (let lig = 0; lig < LIGS; ++lig) {
+
+      gameGrid.push([]);
+
+      for (let col = 0; col < COLS; ++col) {
+
+        gameGrid[lig].push(cell);
+
+      }
+
     }
 
-    function create ()
-    {
-        this.add.image(400, 300, 'sky');
+    var game = new Phaser.Game(width, height, Phaser.CANVAS, '', { preload: preload, create: create });
 
-        var particles = this.add.particles('red');
+    function preload() {
 
-        var emitter = particles.createEmitter({
-            speed: 100,
-            scale: { start: 1, end: 0 },
-            blendMode: 'ADD'
-        });
-
-        var logo = this.physics.add.image(400, 100, 'logo');
-
-        logo.setVelocity(100, 200);
-        logo.setBounce(1, 1);
-        logo.setCollideWorldBounds(true);
-
-        emitter.startFollow(logo);
     }
-    </script>
 
+    function create() {
+
+      game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
+
+
+    }
+
+  };
+
+  </script>
 </body>
+
 </html>
