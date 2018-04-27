@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>hello phaser!</title>
-  <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser-ce@2.10.3/build/phaser.min.js"></script>
 </head>
 
 <body>
@@ -17,9 +17,9 @@
 
     const TARGET_WIDTH = Math.floor(1920 / 2 * 0.9);
 
-    const CELL_SIZE = 40;
+    const CELL_SIZE = 32;
 
-    const ASPECT_RATIO = 16 / 9;
+    const ASPECT_RATIO = 16 / 10;
 
     const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
     const LIGS = Math.floor(COLS / ASPECT_RATIO);
@@ -50,12 +50,30 @@
 
     function preload() {
 
+      game.load.image('ground_1x1', 'assets/Dirt_10.png');
+
     }
+
+    var map;
+    var layer1;
 
     function create() {
 
-      game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
+      //  Creates a blank tilemap
+      map = game.add.tilemap();
+
+      //  Add a Tileset image to the map
+      map.addTilesetImage('ground_1x1');
+
+      //  Creates a new blank layer and sets the map dimensions.
+      //  In this case the map is COLS x LIGS tiles in size and the tiles are CELL_SIZE x CELL_SIZE pixels in size.
+      layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+
+
+      map.fill(0, 0, 0, COLS, LIGS);
+
+      game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
     }
 
