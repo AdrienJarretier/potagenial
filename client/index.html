@@ -8,6 +8,9 @@
 </head>
 
 <body>
+
+  <script src="js/PotaGen.js"></script>
+
   <script type="text/javascript">
   window.onload = function() {
 
@@ -25,6 +28,10 @@
 
     const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
     const LIGS = Math.floor(COLS / ASPECT_RATIO);
+
+    var model = new PotaGen(COLS, LIGS);
+
+    console.log(model.getContent(0,0));
 
     const HUD_COLS = Math.floor(TARGET_WIDTH / HUD_CELL_SIZE);
     const HUD_LIGS = Math.floor(HUD_COLS / ASPECT_RATIO);

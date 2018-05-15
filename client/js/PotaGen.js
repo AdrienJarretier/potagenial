@@ -13,8 +13,8 @@ class PotaGen
     // -------------------------------------------
     initVars()
     {
-        this.durt = {'xy_map':{},'array':[]}
-        this.seed = {'xy_map':{},'array':[]}
+        this.durt = {'xy_map':{},'array':[]} // terre
+        this.seed = {'xy_map':{},'array':[]} // plantes
         this.tools = []
         this.curTool = null
         this.tools.push(
@@ -116,5 +116,16 @@ class PotaGen
         if(!this.lastAction.hasOwnProperty('name'))
             return false
         return this.lastAction.name == name
+    }
+
+    getContent(x, y) {
+
+        return {
+
+            'dirt' : this.durt['xy_map'][x][y],
+            'vegetable' : this.seed['xy_map'][x][y]
+
+        };
+
     }
 }
