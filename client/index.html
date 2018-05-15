@@ -19,10 +19,15 @@
 
     const CELL_SIZE = 32;
 
+    const HUD_CELL_SIZE = 64;
+
     const ASPECT_RATIO = 16 / 10;
 
     const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
     const LIGS = Math.floor(COLS / ASPECT_RATIO);
+
+    const HUD_COLS = Math.floor(TARGET_WIDTH / HUD_CELL_SIZE);
+    const HUD_LIGS = Math.floor(HUD_COLS / ASPECT_RATIO);
 
     var width = COLS * CELL_SIZE;
     var height = LIGS * CELL_SIZE;
@@ -50,7 +55,11 @@
 
     function preload() {
 
-      game.load.image('ground_1x1', 'assets/tiles.png');
+
+      game.canvas.oncontextmenu = function(e) { e.preventDefault(); }
+
+      game.load.image('ground_32x32', 'assets/tiles.png');
+      game.load.image('tools_64x64', 'assets/farm_tool_icons_calciumtrice.png');
 
     }
 
@@ -65,8 +74,11 @@
       //  Creates a blank tilemap
       map = game.add.tilemap();
 
+      toolsMap = game.add.tilemap(null, HUD_CELL_SIZE, HUD_CELL_SIZE);
+
       //  Add a Tileset image to the map
-      map.addTilesetImage('ground_1x1');
+      map.addTilesetImage('ground_32x32');
+      toolsMap.addTilesetImage('tools_64x64');
 
       //  Creates a new blank layer and sets the map dimensions.
       //  In this case the map is COLS x LIGS tiles in size and the tiles are CELL_SIZE x CELL_SIZE pixels in size.
@@ -79,13 +91,14 @@
 
       game.input.addMoveCallback(updateMarker, this);
 
+
       map.fill(0, 0, 0, COLS, LIGS);
 
       layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
-      hudLayer = map.createBlankLayer('hud', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+      hudLayer = toolsMap.create('hud', HUD_COLS, HUD_LIGS, HUD_CELL_SIZE, HUD_CELL_SIZE);
 
-      map.putTile(1, Math.floor(COLS/2), LIGS-1, hudLayer);
+      toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
 
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
@@ -96,9 +109,18 @@
       marker.x = layer1.getTileX(game.input.activePointer.worldX) * 32;
       marker.y = layer1.getTileY(game.input.activePointer.worldY) * 32;
 
-      if (game.input.mousePointer.isDown) {
+      if (game.input.activePointer.leftButton.isDown) {
 
+        console.log('left click');
         map.putTile(1, layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
+
+      }
+
+      if (game.input.activePointer.rightButton.isDown) {
+
+
+        console.log('right click');
+        map.removeTile(layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
 
       }
 
