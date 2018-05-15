@@ -57,6 +57,7 @@
     var map;
     var layer1;
     var layer2;
+    var hudLayer;
 
     function create() {
 
@@ -81,6 +82,10 @@
       map.fill(0, 0, 0, COLS, LIGS);
 
       layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+
+      hudLayer = map.createBlankLayer('hud', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+
+      map.putTile(1, Math.floor(COLS/2), LIGS-1, hudLayer);
 
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
