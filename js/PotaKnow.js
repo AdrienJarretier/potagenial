@@ -115,23 +115,22 @@ function getKnowledgeGraph()
             tool:['transplantoir'],
             seed:['patate']
         },
-        announces:function(potagen,potatool)
+        announces:function(potagen,potatool,sayMethod)
         {
+            console.log(potagen.lastAction)
             if(potagen.lastActionIs('plant'))
                 if(potagen.lastAction.plant.name != 'potato')
-                    return 'Attention, j\'ai demandé une patate'
-            else if(potagen.lastActionIs('dig'))
-                if(potagen.lastAction.durt.level < DEEP_LEVEL)
-                    return '"Planter" c\'est plus profond que ça'
-                else if(potagen.lastAction.durt.level == DEEP_LEVEL)
-                    return 'Voila là c\'est assez profond'
+                    return "J'ai dit une pomme-de-terre"
+                else if(potagen.lastAction.plant.name == 'potato')
+                    if(potagen.lastAction.plant.level < DEEP_LEVEL)
+                        return 'Dépose-la plus profond'
         },
         func:function(potagen,potatool)
         {
             for(var k in potagen.seed.array)
             {
                 var plant = potagen.seed.array[k]
-                if(plant.name == 'potato' && plant.level>ZERO_LEVEL)
+                if(plant.name == 'potato' && plant.level==DEEP_LEVEL)
                     return true
             }
             return false
@@ -143,13 +142,13 @@ function getKnowledgeGraph()
 
 class PotaKnow
 {
-    constructor(potagen,potatool,potadraw,talkJQ)
+    constructor(potagen,potatool,potadraw,speekFunc)
     {
         this.potagen = potagen
         this.potatool = potatool
         this.potadraw = potadraw
         
-        this.talkJQ = talkJQ
+        this.speekFunc = speekFunc
         
         this.knowledges = getKnowledgeGraph()
         this.potadraw.addClickEvent('knower',this,this.callback)
@@ -181,6 +180,8 @@ class PotaKnow
             if(announce != undefined)
                 if(!isNaN(announce))
                 {
+                    if(knowledge.hasOwnProperty('timeouts'))
+                        clearTimeout(knowledge.timeouts[k])
                     if(!knowledge.hasOwnProperty('timeouts'))
                         knowledge['timeouts'] = []
                     knowledge['timeouts'].push(announce)
@@ -209,10 +210,7 @@ class PotaKnow
     say(str)
     {
         console.log('say',str)
-        var lastHtml = this.talkJQ.html()
-        var newHtml = $('<div>').css('opacity',0.5).html(lastHtml)
-        this.talkJQ.html('')
-        this.talkJQ.append(str).append(newHtml)
+        this.speekFunc(str)
     }
     
     evaluateQueue()
