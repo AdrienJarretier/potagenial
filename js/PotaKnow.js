@@ -142,16 +142,15 @@ function getKnowledgeGraph()
 
 class PotaKnow
 {
-    constructor(potagen,potatool,potadraw,speekFunc)
+    constructor(potagen,potatool,registerFunc,speekFunc)
     {
         this.potagen = potagen
         this.potatool = potatool
-        this.potadraw = potadraw
         
         this.speekFunc = speekFunc
         
         this.knowledges = getKnowledgeGraph()
-        this.potadraw.addClickEvent('knower',this,this.callback)
+        registerFunc('knower',this,this.callback)
         
         this.curKnowledge = null
         this.timout = null
