@@ -50,12 +50,13 @@
 
     function preload() {
 
-      game.load.image('ground_1x1', 'assets/Dirt_10.png');
+      game.load.image('ground_1x1', 'assets/tiles.png');
 
     }
 
     var map;
     var layer1;
+    var layer2;
 
     function create() {
 
@@ -70,10 +71,31 @@
       //  In this case the map is COLS x LIGS tiles in size and the tiles are CELL_SIZE x CELL_SIZE pixels in size.
       layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
+      //  Our painting marker
+      marker = game.add.graphics();
+      marker.lineStyle(2, 0x000000, 1);
+      marker.drawRect(0, 0, 32, 32);
+
+      game.input.addMoveCallback(updateMarker, this);
 
       map.fill(0, 0, 0, COLS, LIGS);
 
-      game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
+      layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+
+      // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
+
+    }
+
+    function updateMarker() {
+
+      marker.x = layer1.getTileX(game.input.activePointer.worldX) * 32;
+      marker.y = layer1.getTileY(game.input.activePointer.worldY) * 32;
+
+      if (game.input.mousePointer.isDown) {
+
+        map.putTile(1, layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
+
+      }
 
     }
 
