@@ -1,7 +1,10 @@
 class PotaTool {
+
   constructor(potagen) {
+
     this.potagen = potagen
     this.tool = []
+
     this.tool.push({
       name: 'transplantoir',
       options: {
@@ -9,12 +12,14 @@ class PotaTool {
         2: { durt: -1 }
       }
     })
+
     this.tool.push({
       name: 'arrosoir',
       options: {
         1: { water: 1 },
       }
     })
+
     this.tool.push({
       name: 'tomato',
       plant: {
@@ -22,6 +27,7 @@ class PotaTool {
         name: 'tomato'
       }
     })
+
     this.tool.push({
       name: 'potato',
       plant: {
@@ -30,6 +36,7 @@ class PotaTool {
         name: 'potato'
       }
     })
+
     this.tool.push({
       name: 'carrote',
       plant: {
@@ -39,6 +46,7 @@ class PotaTool {
       }
     })
     this.curTool = null
+
   }
 
   setTool(id) {
@@ -47,20 +55,30 @@ class PotaTool {
   }
 
   use(x, y, option) {
+
     if (this.curTool == null)
       return BAD_TOOL
+
     var tool = this.curTool
+
     if (tool.hasOwnProperty('plant'))
       return this.potagen.plant(x, y, tool.plant)
+
     else if (tool.hasOwnProperty('options')) {
+
       if (!tool.options.hasOwnProperty(option))
         return NO_ACTION
+
       var option = tool.options[option]
       let durt = this.potagen.durt.xy_map[x][y]
+
       if (option.hasOwnProperty('durt'))
         return this.potagen.moveDurt(x, y, option.durt)
+
       if (option.hasOwnProperty('water'))
         return this.potagen.water(x, y)
+
     }
+
   }
 }
