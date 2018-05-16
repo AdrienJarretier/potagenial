@@ -1,6 +1,13 @@
 class PotaTool {
 
-  constructor(potagen) {
+  constructor(potagen, playerPosition) {
+
+    this.playerPosition  = {
+
+        x; playerPosition.x,
+        y: playerPosition.y
+
+    };
 
     this.potagen = potagen
     this.tool = []
