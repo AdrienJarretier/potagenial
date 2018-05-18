@@ -4,7 +4,7 @@ class PotaTool {
 
     this.playerPosition  = {
 
-        x; playerPosition.x,
+        x: playerPosition.x,
         y: playerPosition.y
 
     };

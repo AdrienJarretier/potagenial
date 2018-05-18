@@ -9,6 +9,7 @@
 
 <body>
   <script src="js/PotaGen.js"></script>
+  <script src="js/PotaTool.js"></script>
   <script type="text/javascript">
   window.onload = function() {
 
@@ -27,9 +28,11 @@
     const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
     const LIGS = Math.floor(COLS / ASPECT_RATIO);
 
-    var model = new PotaGen(COLS, LIGS);
+    var potaGen = new PotaGen(COLS, LIGS);
 
-    console.log(model.getContent(0, 0));
+    var potaTool = new PotaTool(potaGen, { x: 5, y: 5 });
+
+    console.log(potaGen.getContent(0, 0));
 
     const HUD_COLS = Math.floor(TARGET_WIDTH / HUD_CELL_SIZE);
     const HUD_LIGS = Math.floor(HUD_COLS / ASPECT_RATIO);
@@ -66,12 +69,16 @@
       game.load.image('ground_32x32', 'assets/tiles.png');
       game.load.image('tools_64x64', 'assets/farm_tool_icons_calciumtrice.png');
 
+      game.load.spritesheet('pepper', 'assets/Pepper.png', 24, 32);
+
     }
 
     var map;
     var layer1;
     var layer2;
+    var playerLayer;
     var hudLayer;
+    var pepper;
 
     function create() {
 
@@ -101,9 +108,20 @@
 
       layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
+      playerLayer = map.createBlankLayer('playerLayer', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+
       hudLayer = toolsMap.create('hud', HUD_COLS, HUD_LIGS, HUD_CELL_SIZE, HUD_CELL_SIZE);
 
       toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
+
+      pepper = game.add.sprite(100, 100, 'pepper');
+      pepper.scale.set(2);
+      pepper.smoothed = false;
+
+      anim = pepper.animations.add('walkRight', [3, 4, 5], 8, true);
+
+
+      anim.play();
 
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
