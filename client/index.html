@@ -118,10 +118,12 @@
       pepper.scale.set(2);
       pepper.smoothed = false;
 
-      anim = pepper.animations.add('walkRight', [3, 4, 5], 8, true);
+      pepper.animations.add('walk_up', [0, 1, 2]);
+      pepper.animations.add('walk_right', [3, 4, 5]);
+      pepper.animations.add('walk_left', [9, 10, 11]);
+      pepper.animations.add('walk_down', [6, 7, 8]);
 
 
-      anim.play();
 
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
@@ -149,39 +151,75 @@
 
     }
 
+    var directionKey = {
+
+      isDown: false,
+      direction: "",
+      oldDirection: ""
+
+    };
+
     function update() {
 
       // Check key states every frame.
-      if (game.input.keyboard.isDown(Phaser.Keyboard.UP) || game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
+
+      directionKey.direction = "";
+
+      if (game.input.keyboard.isDown(Phaser.Keyboard.UP) ||
+        game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
 
         // ufo.x += speed;
         // ufo.angle = 15;
         // rightBtn.alpha = 0.6;
-        console.log("up");
+        directionKey.direction = "up";
 
-      } else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT) || game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
-
-        console.log("left");
+      } else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT) ||
+        game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
 
         // ufo.x -= speed;
         // ufo.angle = -15;
         // leftBtn.alpha = 0.6;
+        directionKey.direction = "left";
 
-      } else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) || game.input.keyboard.isDown(Phaser.Keyboard.D)) {
-
-        // ufo.x += speed;
-        // ufo.angle = 15;
-        // rightBtn.alpha = 0.6;
-        console.log("right");
-
-      } else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN) || game.input.keyboard.isDown(Phaser.Keyboard.S)) {
+      } else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) ||
+        game.input.keyboard.isDown(Phaser.Keyboard.D)) {
 
         // ufo.x += speed;
         // ufo.angle = 15;
         // rightBtn.alpha = 0.6;
-        console.log("down");
+        directionKey.direction = "right";
+
+      } else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN) ||
+        game.input.keyboard.isDown(Phaser.Keyboard.S)) {
+
+        // ufo.x += speed;
+        // ufo.angle = 15;
+        // rightBtn.alpha = 0.6;
+        directionKey.direction = "down";
 
       }
+
+      if ((!directionKey.isDown && directionKey.direction != "") ||
+        directionKey.oldDirection != directionKey.direction) {
+
+        directionKey.isDown = true;
+        directionKey.oldDirection = directionKey.direction;
+
+        pepper.animations.play('walk_' + directionKey.direction, 15, true);
+        console.log("play");
+
+      }
+
+      if (directionKey.isDown && directionKey.direction == "") {
+
+        directionKey.isDown = false;
+
+        pepper.animations.stop();
+        console.log("stop");
+
+      }
+
+
     }
 
   };
