@@ -11,6 +11,8 @@
   <script src="js/PotaGen.js"></script>
   <script src="js/PotaTool.js"></script>
   <script type="text/javascript">
+  "use strict";
+
   window.onload = function() {
 
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
@@ -74,11 +76,13 @@
     }
 
     var map;
+    var toolsMap;
     var layer1;
     var layer2;
     var playerLayer;
     var hudLayer;
     var pepper;
+    var marker;
 
     function create() {
 
@@ -97,6 +101,7 @@
       layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
       //  Our painting marker
+      
       marker = game.add.graphics();
       marker.lineStyle(2, 0x000000, 1);
       marker.drawRect(0, 0, 32, 32);
@@ -114,7 +119,8 @@
 
       toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
 
-      pepper = game.add.sprite(100, 100, 'pepper');
+      pepper = game.add.sprite(potaTool.playerPosition.x * CELL_SIZE, potaTool.playerPosition.y * CELL_SIZE, 'pepper');
+
       pepper.scale.set(2);
       pepper.smoothed = false;
 
@@ -168,36 +174,28 @@
       if (game.input.keyboard.isDown(Phaser.Keyboard.UP) ||
         game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
 
-        // ufo.x += speed;
-        // ufo.angle = 15;
-        // rightBtn.alpha = 0.6;
         directionKey.direction = "up";
 
       } else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT) ||
         game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
 
-        // ufo.x -= speed;
-        // ufo.angle = -15;
-        // leftBtn.alpha = 0.6;
         directionKey.direction = "left";
 
       } else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) ||
         game.input.keyboard.isDown(Phaser.Keyboard.D)) {
 
-        // ufo.x += speed;
-        // ufo.angle = 15;
-        // rightBtn.alpha = 0.6;
         directionKey.direction = "right";
 
       } else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN) ||
         game.input.keyboard.isDown(Phaser.Keyboard.S)) {
 
-        // ufo.x += speed;
-        // ufo.angle = 15;
-        // rightBtn.alpha = 0.6;
         directionKey.direction = "down";
 
       }
+
+      potaTool.movePlayer(directionKey.direction);
+      pepper.x = potaTool.playerPosition.x * CELL_SIZE;
+      pepper.y = potaTool.playerPosition.y * CELL_SIZE;
 
       if ((!directionKey.isDown && directionKey.direction != "") ||
         directionKey.oldDirection != directionKey.direction) {

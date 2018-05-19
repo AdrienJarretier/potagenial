@@ -1,11 +1,15 @@
+"use strict";
+
 class PotaTool {
 
   constructor(potagen, playerPosition) {
 
-    this.playerPosition  = {
+    this.PLAYER_SPEED = 0.1;
 
-        x: playerPosition.x,
-        y: playerPosition.y
+    this.playerPosition = {
+
+      x: playerPosition.x,
+      y: playerPosition.y
 
     };
 
@@ -88,4 +92,30 @@ class PotaTool {
     }
 
   }
+
+  movePlayer(direction) {
+
+    switch (direction) {
+      case 'up':
+        this.playerPosition.y -= this.PLAYER_SPEED;
+        break;
+      case 'down':
+        this.playerPosition.y += this.PLAYER_SPEED;
+
+        break;
+      case 'left':
+        this.playerPosition.x -= this.PLAYER_SPEED;
+
+        break;
+
+      case 'right':
+        this.playerPosition.x += this.PLAYER_SPEED;
+
+        break;
+      default:
+        break;
+    }
+
+  }
+
 }
