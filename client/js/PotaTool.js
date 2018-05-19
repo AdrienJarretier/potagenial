@@ -5,7 +5,7 @@ class PotaTool {
   constructor(potagen, playerPosition) {
 
     // speed in cell / sec
-    this.PLAYER_SPEED = 8;
+    this.PLAYER_SPEED = 10;
 
     this.playerPosition = {
 

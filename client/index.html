@@ -88,6 +88,7 @@
 
     function create() {
 
+      game.world.setBounds(-width / 2, -height / 2, width * 2, height * 2);
 
       //  Creates a blank tilemap
       map = game.add.tilemap();
@@ -113,6 +114,28 @@
 
       map.fill(0, 0, 0, COLS, LIGS);
 
+      for (let i = 0; i < COLS; ++i) {
+
+        map.putTile(2, i, LIGS - 1, layer1);
+        map.putTile(3, i, 0, layer1);
+
+      }
+
+      for (let i = 0; i < LIGS; ++i) {
+
+        map.putTile(4, 0, i, layer1);
+        map.putTile(5, COLS - 1, i, layer1);
+
+      }
+
+      for (let i = 0; i < 2; ++i) {
+        for (let j = 0; j < 2; ++j) {
+
+          map.putTile(i * 2 + j + 6, (COLS - 1) * j, (LIGS - 1) - (LIGS - 1) * i, layer1);
+
+        }
+      }
+
       layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
       playerLayer = map.createBlankLayer('playerLayer', COLS, LIGS, CELL_SIZE, CELL_SIZE);
@@ -122,6 +145,8 @@
       toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
 
       pepper = game.add.sprite(potaTool.playerPosition.x * CELL_SIZE, potaTool.playerPosition.y * CELL_SIZE, 'pepper');
+
+      game.camera.follow(pepper);
 
       pepper.scale.set(2);
       pepper.smoothed = false;
