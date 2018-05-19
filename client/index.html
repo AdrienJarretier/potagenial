@@ -61,7 +61,9 @@
 
     }
 
-    var game = new Phaser.Game(width, height, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
+    var game = new Phaser.Game(width, height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+    var lastTime;
 
     function preload() {
 
@@ -101,7 +103,7 @@
       layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
       //  Our painting marker
-      
+
       marker = game.add.graphics();
       marker.lineStyle(2, 0x000000, 1);
       marker.drawRect(0, 0, 32, 32);
@@ -129,7 +131,7 @@
       pepper.animations.add('walk_left', [9, 10, 11]);
       pepper.animations.add('walk_down', [6, 7, 8]);
 
-
+      lastTime = game.time.elapsedSecondsSince(0);
 
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
@@ -193,7 +195,10 @@
 
       }
 
-      potaTool.movePlayer(directionKey.direction);
+      let newTime = game.time.elapsedSecondsSince(lastTime);
+      potaTool.movePlayer(directionKey.direction, newTime - lastTime);
+      lastTime = newTime;
+
       pepper.x = potaTool.playerPosition.x * CELL_SIZE;
       pepper.y = potaTool.playerPosition.y * CELL_SIZE;
 
