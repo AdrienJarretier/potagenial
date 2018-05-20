@@ -63,11 +63,12 @@
 
     var game = new Phaser.Game(width, height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
-    var lastTime;
+    var lastTime = 0;
 
 
     // speed in pixel / sec
     const PLAYER_SPEED = 14 * CELL_SIZE;
+    const CARROT_SPEED = 2 * CELL_SIZE;
 
     function preload() {
 
@@ -78,6 +79,7 @@
       game.load.image('tools_64x64', 'assets/farm_tool_icons_calciumtrice.png');
 
       game.load.spritesheet('pepper', 'assets/Pepper.png', 24, 32);
+      game.load.spritesheet('carrot', 'assets/Carrot.png', 24, 32);
 
     }
 
@@ -88,6 +90,7 @@
     var playerLayer;
     var hudLayer;
     var pepper;
+    var carrot;
     var marker;
 
     function create() {
@@ -180,6 +183,18 @@
 
 
 
+      carrot = game.add.sprite(-CELL_SIZE, -CELL_SIZE, 'carrot');
+      carrot.smoothed = false;
+      carrot.scale.set(1.5);
+
+
+      carrot.animations.add('walk_up', [0, 1, 2]);
+      carrot.animations.add('walk_right', [3, 4, 5]);
+      carrot.animations.add('walk_left', [9, 10, 11]);
+      carrot.animations.add('walk_down', [6, 7, 8]);
+
+
+
 
       game.physics.enable(pepper, Phaser.Physics.arcade);
 
@@ -198,8 +213,6 @@
       pepper.animations.add('walk_left', [9, 10, 11]);
       pepper.animations.add('walk_down', [6, 7, 8]);
 
-      lastTime = game.time.elapsedSecondsSince(0);
-
       // game.add.sprite(0, 0, game.create.grid('grid', width, height, CELL_SIZE, CELL_SIZE, 'rgba(0, 250, 0, 1)'));
 
     }
@@ -211,7 +224,6 @@
 
       if (game.input.activePointer.leftButton.isDown) {
 
-        console.log('left click');
         map.putTile(1, layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
 
       }
@@ -219,7 +231,6 @@
       if (game.input.activePointer.rightButton.isDown) {
 
 
-        console.log('right click');
         map.removeTile(layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
 
       }
@@ -234,7 +245,75 @@
 
     };
 
+
+
+    let carrotVelocity = {
+
+      x: 0,
+      y: 0,
+      direction: "",
+      oldDirection: ""
+
+    }
+
+    function updateCarrot(elapsedSeconds) {
+
+      if (carrot.y <= -CELL_SIZE) {
+
+        carrotVelocity.x = CARROT_SPEED;
+        carrotVelocity.y = 0;
+        carrotVelocity.direction = 'right';
+
+      }
+
+      if (carrot.x >= width + CELL_SIZE) {
+
+        carrotVelocity.x = 0;
+        carrotVelocity.y = CARROT_SPEED;
+        carrotVelocity.direction = 'down';
+
+      }
+
+      if (carrot.y >= height + CELL_SIZE) {
+
+        carrotVelocity.x = -CARROT_SPEED;
+        carrotVelocity.y = 0;
+        carrotVelocity.direction = 'left';
+
+      }
+
+      if (carrot.x <= -CELL_SIZE && !(carrot.y <= -CELL_SIZE)) {
+
+        carrotVelocity.x = 0;
+        carrotVelocity.y = -CARROT_SPEED;
+        carrotVelocity.direction = 'up';
+
+      }
+
+
+      if (carrotVelocity.oldDirection != carrotVelocity.direction) {
+
+        console.log("carrot play " + 'walk_' + carrotVelocity.direction);
+        carrotVelocity.oldDirection = carrotVelocity.direction;
+        carrot.animations.play('walk_' + carrotVelocity.direction, 10, true);
+      }
+
+      console.log(1/elapsedSeconds);
+
+      carrot.x += carrotVelocity.x * elapsedSeconds;
+      carrot.y += carrotVelocity.y * elapsedSeconds;
+
+    }
+
     function update() {
+
+      let newTime = game.time.totalElapsedSeconds(lastTime);
+
+      let elapsedSeconds = newTime - lastTime;
+
+      lastTime = newTime;
+
+      updateCarrot(elapsedSeconds);
 
       // Check key states every frame.
 
@@ -272,7 +351,6 @@
         directionKey.oldDirection = directionKey.direction;
 
         pepper.animations.play('walk_' + directionKey.direction, 15, true);
-        console.log("play");
 
       }
 
@@ -281,25 +359,19 @@
         directionKey.isDown = false;
 
         pepper.animations.stop();
-        console.log("stop");
-
       }
 
-      setPlayerVelocity(directionKey.direction);
+      setPlayerVelocity(directionKey.direction, elapsedSeconds);
 
 
     }
 
-    function setPlayerVelocity(direction) {
+    function setPlayerVelocity(direction, elapsedSeconds) {
 
       pepper.body.velocity.x = 0;
       pepper.body.velocity.y = 0;
 
-      let newTime = game.time.elapsedSecondsSince(lastTime);
-
-      let newSpeed = (newTime - lastTime) * PLAYER_SPEED * game.time.desiredFps;
-
-      lastTime = newTime;
+      let newSpeed = elapsedSeconds * PLAYER_SPEED * game.time.desiredFps;
 
       switch (direction) {
         case 'up':
