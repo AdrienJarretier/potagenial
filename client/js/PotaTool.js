@@ -2,17 +2,9 @@
 
 class PotaTool {
 
-  constructor(potagen, playerPosition) {
+  constructor(potagen) {
 
-    // speed in cell / sec
-    this.PLAYER_SPEED = 14;
 
-    this.playerPosition = {
-
-      x: playerPosition.x,
-      y: playerPosition.y
-
-    };
 
     this.potagen = potagen
     this.tool = []
@@ -94,31 +86,6 @@ class PotaTool {
 
   }
 
-  movePlayer(direction, elapsedSeconds) {
 
-    let travelDistance = elapsedSeconds * this.PLAYER_SPEED;
-
-    switch (direction) {
-      case 'up':
-        this.playerPosition.y -= travelDistance;
-        break;
-      case 'down':
-        this.playerPosition.y += travelDistance;
-
-        break;
-      case 'left':
-        this.playerPosition.x -= travelDistance;
-
-        break;
-
-      case 'right':
-        this.playerPosition.x += travelDistance;
-
-        break;
-      default:
-        break;
-    }
-
-  }
 
 }

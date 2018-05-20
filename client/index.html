@@ -65,6 +65,10 @@
 
     var lastTime;
 
+
+    // speed in pixel / sec
+    const PLAYER_SPEED = 14 * CELL_SIZE;
+
     function preload() {
 
 
@@ -140,14 +144,14 @@
 
       }
 
-      for (let i = 1; i < COLS-1; ++i) {
+      for (let i = 1; i < COLS - 1; ++i) {
 
         map.putTile(2, i, LIGS - 2, layer1);
         map.putTile(3, i, 1, layer1);
 
       }
 
-      for (let i = 1; i < LIGS-1; ++i) {
+      for (let i = 1; i < LIGS - 1; ++i) {
 
         map.putTile(4, 1, i, layer1);
         map.putTile(5, COLS - 2, i, layer1);
@@ -157,9 +161,9 @@
       for (let i = 0; i < 2; ++i) {
         for (let j = 0; j < 2; ++j) {
 
-          map.putTile(i * 2 + j + 6, (COLS - 3) * j+1, (LIGS - 2) - (LIGS - 3) * i, layer1);
+          map.putTile(i * 2 + j + 6, (COLS - 3) * j + 1, (LIGS - 2) - (LIGS - 3) * i, layer1);
 
-          map.putTile(i * 2 + j + 62, (COLS - 1) * j, (LIGS-1)*i, layer1);
+          map.putTile(i * 2 + j + 62, (COLS - 1) * j, (LIGS - 1) * i, layer1);
 
         }
       }
@@ -172,7 +176,17 @@
 
       toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
 
-      pepper = game.add.sprite(potaTool.playerPosition.x * CELL_SIZE, potaTool.playerPosition.y * CELL_SIZE, 'pepper');
+      pepper = game.add.sprite(width / 2, height / 2, 'pepper');
+
+
+
+
+      game.physics.enable(pepper, Phaser.Physics.arcade);
+
+      game.physics.arcade.setBounds(CELL_SIZE / 2, 0, width - CELL_SIZE, height - CELL_SIZE);
+
+      pepper.body.collideWorldBounds = true;
+
 
       game.camera.follow(pepper);
 
@@ -248,12 +262,8 @@
 
       }
 
-      let newTime = game.time.elapsedSecondsSince(lastTime);
-      potaTool.movePlayer(directionKey.direction, newTime - lastTime);
-      lastTime = newTime;
-
-      pepper.x = potaTool.playerPosition.x * CELL_SIZE;
-      pepper.y = potaTool.playerPosition.y * CELL_SIZE;
+      // pepper.x = potaTool.playerPosition.x * CELL_SIZE;
+      // pepper.y = potaTool.playerPosition.y * CELL_SIZE;
 
       if ((!directionKey.isDown && directionKey.direction != "") ||
         directionKey.oldDirection != directionKey.direction) {
@@ -275,6 +285,48 @@
 
       }
 
+      setPlayerVelocity(directionKey.direction);
+
+
+    }
+
+    function setPlayerVelocity(direction) {
+
+      pepper.body.velocity.x = 0;
+      pepper.body.velocity.y = 0;
+
+      let newTime = game.time.elapsedSecondsSince(lastTime);
+
+      let newSpeed = (newTime - lastTime) * PLAYER_SPEED * game.time.desiredFps;
+
+      lastTime = newTime;
+
+      switch (direction) {
+        case 'up':
+
+          pepper.body.velocity.y = -newSpeed;
+
+          break;
+        case 'down':
+
+          pepper.body.velocity.y = newSpeed;
+
+          break;
+        case 'left':
+
+          pepper.body.velocity.x = -newSpeed;
+
+          break;
+
+        case 'right':
+
+          pepper.body.velocity.x = newSpeed;
+
+          break;
+        default:
+
+          break;
+      }
 
     }
 
