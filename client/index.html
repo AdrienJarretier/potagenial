@@ -128,22 +128,38 @@
 
       for (let i = 0; i < COLS; ++i) {
 
-        map.putTile(2, i, LIGS - 1, layer1);
-        map.putTile(3, i, 0, layer1);
+        map.putTile(60, i, LIGS - 1, layer1);
+        map.putTile(60, i, 0, layer1);
 
       }
 
       for (let i = 0; i < LIGS; ++i) {
 
-        map.putTile(4, 0, i, layer1);
-        map.putTile(5, COLS - 1, i, layer1);
+        map.putTile(61, 0, i, layer1);
+        map.putTile(61, COLS - 1, i, layer1);
+
+      }
+
+      for (let i = 1; i < COLS-1; ++i) {
+
+        map.putTile(2, i, LIGS - 2, layer1);
+        map.putTile(3, i, 1, layer1);
+
+      }
+
+      for (let i = 1; i < LIGS-1; ++i) {
+
+        map.putTile(4, 1, i, layer1);
+        map.putTile(5, COLS - 2, i, layer1);
 
       }
 
       for (let i = 0; i < 2; ++i) {
         for (let j = 0; j < 2; ++j) {
 
-          map.putTile(i * 2 + j + 6, (COLS - 1) * j, (LIGS - 1) - (LIGS - 1) * i, layer1);
+          map.putTile(i * 2 + j + 6, (COLS - 3) * j+1, (LIGS - 2) - (LIGS - 3) * i, layer1);
+
+          map.putTile(i * 2 + j + 62, (COLS - 1) * j, (LIGS-1)*i, layer1);
 
         }
       }
