@@ -1,13 +1,10 @@
+"use strict";
+
 class PotaTool {
 
-  constructor(potagen, playerPosition) {
+  constructor(potagen) {
 
-    this.playerPosition  = {
 
-        x; playerPosition.x,
-        y: playerPosition.y
-
-    };
 
     this.potagen = potagen
     this.tool = []
@@ -88,4 +85,7 @@ class PotaTool {
     }
 
   }
+
+
+
 }
