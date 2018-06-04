@@ -25,7 +25,7 @@
 
     const HUD_CELL_SIZE = 64;
 
-    const ASPECT_RATIO = 16 / 10;
+    const ASPECT_RATIO = 16 / 9;
 
     const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
     const LIGS = Math.floor(COLS / ASPECT_RATIO);
@@ -203,7 +203,7 @@
       pepper.body.collideWorldBounds = true;
 
 
-      game.camera.follow(pepper);
+      //game.camera.follow(pepper);
 
       pepper.scale.set(2);
       pepper.smoothed = false;
@@ -224,7 +224,12 @@
 
       if (game.input.activePointer.leftButton.isDown) {
 
-        map.putTile(1, layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
+        let tileX = layer2.getTileX(marker.x);
+        let tileY = layer2.getTileY(marker.y);
+
+        map.putTile(1, tileX, tileY, layer2);
+
+        potaTool.use(tileX, tilesY, );
 
       }
 
