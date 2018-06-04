@@ -6,283 +6,290 @@
     
 */
 
-function getKnowledgeGraph()
+TACHE_FINALE = 0
+TACHE_REWARD = 1
+TACHE_ALTERNIVE = 2
+TACHE_SIMPLE = 3
+
+function getKnowledgeGraph(plantations)
 {
     // ----------------------------------------------- Use the tools
+    // Nous allons apprendre à <name>
+    // Votre but est de <name>
+    // Vous savez <name>
+    // niv
     var knowledges = {}
-    knowledges['use_tool'] =
-    {
-        done:false,
-        name:'Utiliser les outils',
-        reward:'Bravo, vous savez maintenant utiliser votre potager !',
-        pred:['add_durt'],
-        context:
-        {
-            potager:[3,3],
-            tool:['transplantoir'],
-            seed:[]
-        }
-    }
     // -----------
-    knowledges['pickup_tool'] =
+    knowledges['gerer_potager'] =
     {
-        done:false,
-        name:'Récupérer les outils',
-        help:'Récupère une outil dans la ceinture',
-        reward:'Bravo tu sais récupérer un outil !',
-        pred:[],
-        context:
-        {
-            potager:[3,3],
-            tool:['transplantoir'],
-            seed:[]
-        },
-        func:function(potagen,potatool)
-        {
-            return potatool.curTool!=null
-        }
+        name:'gérer votre potager',
+        pred:['gerer_plante','gerer_espace'],
     }
-    knowledges['dig_hole'] =
-    {
-        done:false,
-        name:'Utiliser les outils',
-        help:'Essai à présent de creuser un trou ! (MOUSE1)',
-        pred:['pickup_tool'],
-        context:
+        // -----------
+        knowledges['gerer_plante'] =
         {
-            potager:[3,3],
-            tool:['transplantoir'],
-            seed:[]
-        },
-        announces:function(potagen,potatool,sayMethod)
-        {
-            console.log(potagen.lastActionIs('dig'))
-            if(potagen.lastActionIs('dig'))
-                if(potagen.lastAction.durt.level < DEEP_LEVEL)
+            name:'gérer une plantation',
+            pred:['savoir_planter','maintenir','recolter'],
+        }
+            // -----------
+            knowledges['savoir_planter'] =
+            {
+                name:'planter dans votre potager',
+                pred:['semer_planter','recouvrir'],
+            }
+                // -----------
+                knowledges['semer_planter'] =
                 {
-                    var durt = potagen.lastAction.durt
-                    return setTimeout(function()
-                    {
-                        if(durt.level<DEEP_LEVEL)
-                            sayMethod('Plus profond')
-                    },2000)
+                    name:'faire la différence entre semer et planter',
+                    pred:['semer','planter'],
                 }
-        },
-        func:function(potagen,potatool)
-        {
-            for(var k in potagen.durt.array)
+                    // -----------
+                    knowledges['semer'] =
+                    {
+                        name:'semer des graines',
+                        doneFunc:function(event)
+                        {
+                            if(event.type=='plant')
+                            {
+                                if(event.plant.seed=='seed')
+                                {
+                                    if(event.plant.level==MIDD_LEVEL)
+                                        return true
+                                    else if(event.plant.level>MIDD_LEVEL)
+                                        return 'Attention pas trop profond !'
+                                    else if(event.plant.level<MIDD_LEVEL)
+                                        return 'Plus profond !'
+                                }
+                                else
+                                    return 'Une graine j\'ai dit !'
+                                
+                            }
+                            else if(event.type=='dig')
+                            {
+                                if(event.durt.level>MIDD_LEVEL)
+                                    return 'Attention pas trop profond !'
+                            }
+                            else if(event.type=='bury')
+                            {
+                                if(event.durt.level==MIDD_LEVEL)
+                                    return "Voila, c'est la bonne profondeure"
+                            }
+                        }
+                    }
+                    knowledges['planter'] =
+                    {
+                        name:'planter des racines',
+                        doneFunc:function(event)
+                        {
+                            console.log(event)
+                            if(event.type=='plant')
+                            {
+                                if(event.plant.seed==event.plant.name)
+                                {
+                                    if(event.plant.level==DEEP_LEVEL)
+                                        return true
+                                    else if(event.plant.level<DEEP_LEVEL)
+                                        return 'Plus profond !'
+                                }
+                                else
+                                    return 'Une racine j\'ai dit !'
+                                
+                            }
+                        }
+                    }
+                // -----------
+                knowledges['recouvrir'] =
+                {
+                    name:'recouvrir vos plantes',
+                    pred:['proteger_graine','cacher_soleil'],
+                }
+                    // -----------
+                    knowledges['proteger_graine'] =
+                    {
+                        name:'proteger les graines',
+                    }
+                    knowledges['cacher_soleil'] =
+                    {
+                        name:'cacher les racines du soleil',
+                    }
+            // -----------
+            knowledges['maintenir'] =
             {
-                if(potagen.durt.array[k].level == DEEP_LEVEL)
-                    return true
+                name:'maintenir vos plantations',
+                /// TODO
             }
-            return false
-        }
-    }
-    knowledges['add_durt'] =
-    {
-        done:false,
-        name:'Remblayer',
-        help:'A présent, remblai les trous que tu as fait ! (MOUSE2)',
-        pred:['dig_hole'],
-        context:
-        {
-            potager:[3,3],
-            tool:['transplantoir'],
-            seed:[]
-        },
-        func:function(potagen,potatool)
-        {
-            var allGood = true
-            for(var k in potagen.durt.array)
+            knowledges['recolter'] =
             {
-                if(potagen.durt.array[k].level > ZERO_LEVEL)
-                    allGood = false
+                name:'récolter vos plantations',
+                /// TODO
             }
-            return allGood
+        // -----------
+        knowledges['gerer_espace'] =
+        {
+            name:'gérer l\'espace de votre potager',
+            pred:['accessible','organiser'],
         }
-    }
-    // ----------------------------------------------- Plant a seed
-    knowledges['plant_seed'] =
-    {
-        done:false,
-        name:'Planter',
-        help:'Essai de déposer une pomme-de-terre ... dans la terre',
-        reward:'Bravo, tu as compris le principe de planter',
-        pred:['use_tool'],
-        context:
-        {
-            potager:[3,3],
-            tool:['transplantoir'],
-            seed:['patate']
-        },
-        announces:function(potagen,potatool,sayMethod)
-        {
-            console.log(potagen.lastAction)
-            if(potagen.lastActionIs('plant'))
-                if(potagen.lastAction.plant.name != 'potato')
-                    return "J'ai dit une pomme-de-terre"
-                else if(potagen.lastAction.plant.name == 'potato')
-                    if(potagen.lastAction.plant.level < DEEP_LEVEL)
-                        return 'Dépose-la plus profond'
-        },
-        func:function(potagen,potatool)
-        {
-            for(var k in potagen.seed.array)
+            // -----------
+            knowledges['accessible'] =
             {
-                var plant = potagen.seed.array[k]
-                if(plant.name == 'potato' && plant.level==DEEP_LEVEL)
-                    return true
+                name:'rendre le potager accessible',
+                pred:['placer_chemin','chemin_utile'],
             }
-            return false
-        }
-    }
+                // -----------
+                knowledges['placer_chemin'] =
+                {
+                    name:'placer un chemin dans votre potager',
+                }
+                knowledges['chemin_utile'] =
+                {
+                    name:'créer des allées dans votre potager',
+                }
+            // -----------
+            knowledges['organiser'] =
+            {
+                name:'organiser les plantations',
+                pred:['preparer_terrain','planter_preparation'],
+            }
+                // -----------
+                knowledges['preparer_terrain'] =
+                {
+                    name:'préparer la plantation',
+                    pred:['placer_cordage','cordage_optimise'],
+                }
+                    // -----------
+                    knowledges['placer_cordage'] =
+                    {
+                        name:'placer le cordage',
+                    }
+                    knowledges['cordage_optimise'] =
+                    {
+                        name:'optimiser le cordage',
+                    }
+                knowledges['planter_preparation'] =
+                {
+                    name:'planter sur les cordages',
+                }
     
     return knowledges
 }
 
 class PotaKnow
 {
-    constructor(potagen,potatool,registerFunc,speekFunc)
+    constructor(potagen,potatool,speekFunc,taskFunc)
     {
         this.potagen = potagen
         this.potatool = potatool
         
         this.speekFunc = speekFunc
+        this.taskFunc = taskFunc
         
         this.knowledges = getKnowledgeGraph()
-        registerFunc('knower',this,this.callback)
+        this.potagen.register('knower',this,this.callback)
         
-        this.curKnowledge = null
-        this.timout = null
-        
-        this.queue = []
+        this.actTask = null
     }
-    
-    callback(act)
+    // -------------------------------------
+    callback(event)
     {
-        if(act == TOO_DEEP)
-            this.say('Attention tu ne peux pas creuser plus')
-        else if(act == TOO_HEIGHT)
-            this.say('Tu ne peux plus rajouter de terre !')
-        
-        var knowledge = this.knowledges[this.curKnowledge]
-        if(knowledge.done)
+        if(this.actTask==null)
             return
-        if(knowledge.hasOwnProperty('announces'))
-        {
-            var obj = this
-            var sayMethod = function(str)
-            {
-                obj.say(str)
-            }
-            var announce = knowledge.announces.call(knowledge,this.potagen,this.potatool,sayMethod)
-            if(announce != undefined)
-                if(!isNaN(announce))
-                {
-                    if(knowledge.hasOwnProperty('timeouts'))
-                        clearTimeout(knowledge.timeouts[k])
-                    if(!knowledge.hasOwnProperty('timeouts'))
-                        knowledge['timeouts'] = []
-                    knowledge['timeouts'].push(announce)
-                }
-                else
-                    this.say(announce)
-        }
-        var isDone = knowledge.func.call(knowledge,this.potagen,this.potatool)
-        if(isDone)
-        {
-            knowledge.done = true
-            if(knowledge.hasOwnProperty('timeouts'))
-            {
-                for(var k in knowledge.timeouts)
-                    clearTimeout(knowledge.timeouts[k])
-            }
-            if(knowledge.hasOwnProperty('reward'))
-            {
-                this.drawDoneTask(knowledge)
-                return
-            }
+            
+        var ret = this.actTask.doneFunc(event)
+        if(ret===true)
             this.nextKnowledge()
-        }
-    }
-    
-    say(str)
-    {
-        console.log('say',str)
-        this.speekFunc(str)
-    }
-    
-    evaluateQueue()
-    {
-        var workingKnowledge = null
-        var keys = Object.keys(this.knowledges)
-        var keyId = 0
-        while(workingKnowledge==null && keyId<keys.length)
-        {
-            var key = keys[keyId]
-            if(!this.knowledges[key].done)
-                workingKnowledge = key
-            keyId++
-        }
-        if(workingKnowledge == null)
-            return
-        this.queue = this.generateQueue(workingKnowledge)
-        this.queue.reverse()
-    }
-    
-    generateQueue(knowledgeKey)
-    {
-        var queue = [knowledgeKey]
-        var knowledge = this.knowledges[knowledgeKey]
-        for(var k in knowledge.pred)
-        {
-            var pred = knowledge.pred[k]
-            if(!this.knowledges[pred].done)
-                queue = queue.concat(this.generateQueue(pred))
-        }
-        return queue
-    }
-    
-    drawDoneTask(knowledge)
-    {
-        this.say(knowledge.reward)
-        var obj = this
-        setTimeout(function()
-        {
-            obj.nextKnowledge()
-        },3000)
-    }
-    
-    nextKnowledge()
-    {
-        if(this.queue.length == 0)
-        {
-            this.evaluateQueue()
-            if(this.queue.length == 0)
-            {
-                this.say('VOUS AVEZ TERMINE LE JEU !!!')
-                return
-            }
-        }
-        this.curKnowledge = this.queue.shift()
-        console.log(this.curKnowledge,this.queue)
-        var knowledge = this.knowledges[this.curKnowledge]
-        
-        if(knowledge.hasOwnProperty('func'))
-        {
-            // pré-évaluation
-            knowledge.done = knowledge.func.call(knowledge,this.potagen,this.potatool)
-            if(knowledge.done)
-            {
-                this.nextKnowledge()
-                return;
-            }
-            this.say(knowledge.help)
-        }
         else
         {
-            knowledge.done = true
-            this.drawDoneTask(knowledge)
+            if(typeof(ret) == 'string')
+                this.say(ret)
         }
+    }
+    // -------------------------------------
+    say(str)
+    {
+        console.log(str)
+        this.speekFunc(str)
+    }
+    newTask(str)
+    {
+        console.log('big task - '+str)
+        this.taskFunc(str)
+    }
+    // -------------------------------------
+    // -------------------------------------
+    nextKnowledge()
+    {
+        if(this.actTask != null)
+        {
+            this.actTask.done = true
+            this.say('Bravo tu sais '+this.actTask.name)
+            var parent = this.actTask.parents[0]
+            var lastBrother = parent.pred[parent.pred.length-1]
+            if(lastBrother==this.actTask.id)
+            {
+                this.say("Ce qui veux dite que tu as compris comment "+parent.name)
+                this.newTask('')
+            }
+        }
+        var next = this.threeLastNotDone(this.knowledges['gerer_potager'])
+        if(next.parents[0].pred[1]==next.id)
+        {
+            this.say("J'ai une idée, apprenons à "+next.parents[0].name)
+            this.newTask(next.parents[0].name)
+        }
+        this.actTask = next
+        this.say('Apprenons à '+next.name)
+    }
+    //-------------
+    threeLastNotDone(three)
+    {
+        if(!three.hasOwnProperty('pred'))
+            if(!three.done)
+            {
+                three['parents'] = []
+                return three
+            }
+            else
+                return null
+        
+        for(var k in three.pred)
+        {
+            var t = this.knowledges[three.pred[k]]
+            var sub = this.threeLastNotDone(t)
+            if(sub!=null)
+            {
+                sub['parents'].push(three)
+                if(!sub.hasOwnProperty('id'))
+                    sub['id'] = three.pred[k]
+                return sub;
+            }
+        }
+        return null
+    }
+    // -------------------------------------
+    // -------------------------------------
+    learn(task)
+    {        
+        if(!task.hasOwnProperty('pred'))
+            task['done'] = true
+        
+        if(task.hasOwnProperty('done') && task.done)
+        {
+            let phrases = ['Allons ','Allez, voyons comment ','Apprenons à ']
+            this.say(this.randomPhrase(phrases)+task.name)
+            this.say('Bravo, vous avez compris comment '+task.name)
+            return
+        }
+        
+        for(var k in task.pred)
+        {
+            var subTask = this.knowledges[task.pred[k]]
+            this.learn(subTask)
+            if(k==0)
+            {
+                this.newTask(task.name)
+                this.say('Tiens, j\'ai une idée, si on apprenait à '+task.name)
+            }
+        }
+        this.say('Super on sais maintenant '+task.name)
     }
 }
