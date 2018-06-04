@@ -34,6 +34,21 @@
 
     var potaTool = new PotaTool(potaGen, { x: 5, y: 5 });
 
+    // PotaKnow(potagen,potatool,(event) => {
+
+    //     console.log('potagen modified');
+    //     console.log(event);
+
+    // },(str) => {
+
+    //     console.log('say : ' + str);
+
+    // },(str) => {
+
+    //     console.log('task changed : ' + str);
+
+    // });
+
     console.log(potaGen.getContent(0, 0));
 
     const HUD_COLS = Math.floor(TARGET_WIDTH / HUD_CELL_SIZE);
@@ -219,8 +234,12 @@
 
     function updateMarker() {
 
-      marker.x = layer1.getTileX(game.input.activePointer.worldX) * 32;
-      marker.y = layer1.getTileY(game.input.activePointer.worldY) * 32;
+      let tileX = layer1.getTileX(game.input.activePointer.worldX);
+      let tileY = layer1.getTileY(game.input.activePointer.worldY);
+
+      marker.x = tileX * 32;
+      marker.y = tileY * 32;
+
 
       if (game.input.activePointer.leftButton.isDown) {
 
@@ -229,12 +248,11 @@
 
         map.putTile(1, tileX, tileY, layer2);
 
-        potaTool.use(tileX, tilesY, );
+        // potaTool.use(tileX, tilesY, );
 
       }
 
       if (game.input.activePointer.rightButton.isDown) {
-
 
         map.removeTile(layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
 
