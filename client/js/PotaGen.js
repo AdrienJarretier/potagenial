@@ -13,8 +13,9 @@ class PotaGen
     // -------------------------------------------
     initVars()
     {
-        this.durt = {'xy_map':{},'array':[]} // terre
-        this.seed = {'xy_map':{},'array':[]} // plantes
+        this.callbacks = {}
+        this.durt = {'xy_map':{},'array':[]}
+        this.seed = {'xy_map':{},'array':[]}
         this.tools = []
         this.curTool = null
         this.tools.push(
@@ -23,7 +24,20 @@ class PotaGen
             dig:1,
             water:0
         })
-        this.lastAction = {}
+    }
+    // -------------------------------------------
+    register(id,obj,func)
+    {
+        this.callbacks[id] = {obj:obj,func:func}
+    }
+    // -------------------------------------------
+    sendEvent(event)
+    {
+        for(var k in this.callbacks)
+        {
+            var caller = this.callbacks[k]
+            caller.func.call(caller.obj,event)
+        }
     }
     // -------------------------------------------
     constructor(w,h)
@@ -61,10 +75,17 @@ class PotaGen
     {
         var wat = this.durt.xy_map[x][y].water
         if(wat==WATER_2ET)
+        {
+            this.sendEvent({type:'water',durt:this.durt.xy_map[x][y]})
             return TOO_WET
-        wat += 1
-        this.durt.xy_map[x][y].water = wat
-        return OK
+        }
+        else
+        {
+            wat += 1
+            this.durt.xy_map[x][y].water = wat
+            this.sendEvent({type:'water',durt:this.durt.xy_map[x][y]})
+            return OK
+        }
     }
     // -------------------------------------------
     moveDurt(x,y,amount)
@@ -83,18 +104,21 @@ class PotaGen
             ret = TOO_DEEP
         }
         this.durt.xy_map[x][y].level = level
-        this.lastAction = {'name':amount>0?'dig':'bury',x:x,y:y,amount:amount,durt:this.durt.xy_map[x][y]}
+        this.sendEvent(
+            {type:amount>0?'dig':'bury',x:x,y:x,durt:this.durt.xy_map[x][y]})
         return ret
     }
     // -------------------------------------------
     dig(x,y)
     {
-        return moveDurt(x,y,1)
+        var ret = moveDurt(x,y,1)
+        return ret
     }
     // -------------------------------------------
     bury(x,y)
     {
-        return moveDurt(x,y,-1)
+        var ret = moveDurt(x,y,-1)
+        return ret
     }
     // -------------------------------------------
     plant(x,y,plantType)
@@ -107,25 +131,8 @@ class PotaGen
         {
             this.seed.xy_map[x][y][k] = plantType[k]
         }
-        this.lastAction = {'name':'plant',x:x,y:y,'plant':this.seed.xy_map[x][y]}
+        
+        this.sendEvent({type:'plant',x:x,y:x,plant:this.seed.xy_map[x][y]})
         return OK
-    }
-    // -------------------------------------------
-    lastActionIs(name)
-    {
-        if(!this.lastAction.hasOwnProperty('name'))
-            return false
-        return this.lastAction.name == name
-    }
-
-    getContent(x, y) {
-
-        return {
-
-            'dirt' : this.durt['xy_map'][x][y],
-            'vegetable' : this.seed['xy_map'][x][y]
-
-        };
-
     }
 }
