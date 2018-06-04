@@ -81,7 +81,6 @@ function getKnowledgeGraph(plantations)
                         name:'planter des racines',
                         doneFunc:function(event)
                         {
-                            console.log(event)
                             if(event.type=='plant')
                             {
                                 if(event.plant.seed==event.plant.name)
@@ -106,21 +105,57 @@ function getKnowledgeGraph(plantations)
                     // -----------
                     knowledges['proteger_graine'] =
                     {
-                        name:'proteger les graines',
+                        name:'protéger les graines',
+                        doneFunc:function(event)
+                        {
+                            if(event.type!='bury')
+                                'Que fais-tu ?'
+                            if(event.plant.name=='NO PLANT')
+                                return "Ah, il n'y a rien à enterer ici..."
+                            if(event.plant.seed!='seed')
+                                return 'On vas commencer par les graines...'
+                            if(event.plant.level!=MIDD_LEVEL)
+                                return 'Hum, cette graine a été mal plantée...'
+                            if(event.durt.level<ZERO_LEVEL)
+                                return 'Pas si haut, la graine a besoin de soleil !'
+                            return true;
+                        }
                     }
                     knowledges['cacher_soleil'] =
                     {
                         name:'cacher les racines du soleil',
+                        doneFunc:function(event)
+                        {
+                            if(event.type!='bury')
+                                'Que fais-tu ?'
+                            if(event.plant.name=='NO PLANT')
+                                return "Ah, il n'y a rien à enterer ici..."
+                            if(event.plant.seed!=event.plant.name)
+                                return "Cette fois on s'occupe des racines..."
+                            if(event.plant.level!=DEEP_LEVEL)
+                                return 'Hum, cette racine a été mal plantée...'
+                            if(event.durt.level>PILE_LEVEL)
+                                return 'Plus haut !'
+                            return true;
+                        }
                     }
             // -----------
             knowledges['maintenir'] =
             {
                 name:'maintenir vos plantations',
+                doneFunc:function(event)
+                {
+                    return true
+                }
                 /// TODO
             }
             knowledges['recolter'] =
             {
                 name:'récolter vos plantations',
+                doneFunc:function(event)
+                {
+                    return true
+                }
                 /// TODO
             }
         // -----------
@@ -139,10 +174,21 @@ function getKnowledgeGraph(plantations)
                 knowledges['placer_chemin'] =
                 {
                     name:'placer un chemin dans votre potager',
+                    doneFunc:function(event)
+                    {
+                        if(event.type=='plant')
+                            if(event.plant.name!='gravier')
+                                return 'Pas le bon outil peut-être ?'
+                            return true
+                    }
                 }
                 knowledges['chemin_utile'] =
                 {
                     name:'créer des allées dans votre potager',
+                    doneFunc:function(event)
+                    {
+                        return true
+                    }
                 }
             // -----------
             knowledges['organiser'] =
@@ -154,20 +200,35 @@ function getKnowledgeGraph(plantations)
                 knowledges['preparer_terrain'] =
                 {
                     name:'préparer la plantation',
-                    pred:['placer_cordage','cordage_optimise'],
+                    pred:['placer_cordeau','cordeau_optimise'],
                 }
                     // -----------
-                    knowledges['placer_cordage'] =
+                    knowledges['placer_cordeau'] =
                     {
                         name:'placer le cordage',
+                        doneFunc:function(event)
+                        {
+                            if(event.type=='plant')
+                                if(event.plant.name!='cordeau')
+                                    return 'Pas le bon outil peut-être ?'
+                                return true
+                        }
                     }
-                    knowledges['cordage_optimise'] =
+                    knowledges['cordeau_optimise'] =
                     {
                         name:'optimiser le cordage',
+                        doneFunc:function(event)
+                        {
+                            return true
+                        }
                     }
                 knowledges['planter_preparation'] =
                 {
                     name:'planter sur les cordages',
+                    doneFunc:function(event)
+                    {
+                        return true
+                    }
                 }
     
     return knowledges
@@ -221,16 +282,21 @@ class PotaKnow
         if(this.actTask != null)
         {
             this.actTask.done = true
-            this.say('Bravo tu sais '+this.actTask.name)
+            this.say('Bravo vous savez '+this.actTask.name)
             var parent = this.actTask.parents[0]
             var lastBrother = parent.pred[parent.pred.length-1]
             if(lastBrother==this.actTask.id)
             {
-                this.say("Ce qui veux dite que tu as compris comment "+parent.name)
+                this.say("Ce qui veux dire que vous avez compris comment "+parent.name)
                 this.newTask('')
             }
         }
         var next = this.threeLastNotDone(this.knowledges['gerer_potager'])
+        if(next == null)
+        {
+            this.say('Bravo vous avez terminé le jeu !')
+            return
+        }
         if(next.parents[0].pred[1]==next.id)
         {
             this.say("J'ai une idée, apprenons à "+next.parents[0].name)

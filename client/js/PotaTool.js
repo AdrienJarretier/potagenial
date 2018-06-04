@@ -50,6 +50,26 @@ class PotaTool
                 name:'carotte'
             }
         })
+        this.tool.push(
+        {
+            name:'cordeau',
+            plant:
+            {
+                seed:'cordeauCorde',
+                type:'stay',
+                name:'cordeau'
+            }
+        })
+        this.tool.push(
+        {
+            name:'gravier',
+            plant:
+            {
+                seed:'gravier',
+                type:'stay',
+                name:'gravier'
+            }
+        })
         this.curTool = null
     }
     
