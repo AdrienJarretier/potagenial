@@ -36,6 +36,7 @@ function getKnowledgeGraph(plantations)
             {
                 name:'planter dans votre potager',
                 pred:['semer_planter','recouvrir'],
+                info:'La graine se seme, la racine se plante. On seme prêt du sol, on plante loin du soleil'
             }
                 // -----------
                 knowledges['semer_planter'] =
@@ -143,12 +144,23 @@ function getKnowledgeGraph(plantations)
             knowledges['maintenir'] =
             {
                 name:'maintenir vos plantations',
-                doneFunc:function(event)
-                {
-                    return true
-                }
-                /// TODO
+                pred:['maintenir_graine','maintenir_patate']
             }
+                // -----------
+                knowledges['maintenir_graine'] =
+                {
+                    name:'protéger les graines',
+                    doneFunc:function(event)
+                    {
+                    }
+                }
+                knowledges['maintenir_patate'] =
+                {
+                    name:'cacher les racines du soleil',
+                    doneFunc:function(event)
+                    {
+                    }
+                }
             knowledges['recolter'] =
             {
                 name:'récolter vos plantations',
@@ -245,6 +257,9 @@ class PotaKnow
         this.taskFunc = taskFunc
         
         this.knowledges = getKnowledgeGraph()
+        for(var k in this.knowledges)
+            this.knowledges[k]['id'] = k
+        
         this.potagen.register('knower',this,this.callback)
         
         this.actTask = null
@@ -281,37 +296,81 @@ class PotaKnow
     {
         if(this.actTask != null)
         {
-            this.actTask.done = true
-            this.say('Bravo vous savez '+this.actTask.name)
-            var parent = this.actTask.parents[0]
-            var lastBrother = parent.pred[parent.pred.length-1]
-            if(lastBrother==this.actTask.id)
-            {
-                this.say("Ce qui veux dire que vous avez compris comment "+parent.name)
-                this.newTask('')
-            }
+            this.terminateTask(this.actTask)
         }
         var next = this.threeLastNotDone(this.knowledges['gerer_potager'])
-        if(next == null)
+        this.actTask = next
+        this.startTask(next)
+    }
+    //-------------
+    startTask(task)
+    {
+        if(task == null)
         {
             this.say('Bravo vous avez terminé le jeu !')
             return
         }
-        if(next.parents[0].pred[1]==next.id)
+        this.say('Apprenons à '+task.name)
+        if(task.hasOwnProperty('story'))
         {
-            this.say("J'ai une idée, apprenons à "+next.parents[0].name)
-            this.newTask(next.parents[0].name)
+            this.say(task.story)
         }
-        this.actTask = next
-        this.say('Apprenons à '+next.name)
+    }
+    //-------------
+    terminateTask(task)
+    {
+        task.done = true
+        this.say('Bravo vous savez '+task.name)
+        if(task.hasOwnProperty('info'))
+            this.say('Souvenez vous, '+task.info)
+        var wasLastOfParent = this.taskWasLast(task.id)
+        var isFirstOf = this.isFirst(task.id)
+        if(wasLastOfParent!=null)
+        {
+            this.terminateTask(wasLastOfParent)
+        }
+        else if(isFirstOf!=null)
+        {
+            this.say("J'ai une idée, apprenons à "+isFirstOf.name)
+            this.newTask(isFirstOf.name)
+        }
+    }
+    //-------------
+    isFirst(taskName)
+    {
+        for(var k in this.knowledges)
+        {
+            var par = this.knowledges[k]
+            if(par.hasOwnProperty('pred'))
+            {
+                if(taskName==par.pred[0])
+                    return par
+            }
+        }
+        return null
+    }
+    //-------------
+    taskWasLast(taskName)
+    {
+        for(var k in this.knowledges)
+        {
+            var par = this.knowledges[k]
+            if(par.hasOwnProperty('pred'))
+            {
+                if(taskName==par.pred[par.pred.length-1])
+                    return par
+            }
+        }
+        return null
     }
     //-------------
     threeLastNotDone(three)
     {
+        three['parents'] = []
+        
         if(!three.hasOwnProperty('pred'))
             if(!three.done)
             {
-                three['parents'] = []
                 return three
             }
             else
@@ -330,6 +389,11 @@ class PotaKnow
             }
         }
         return null
+    }
+    // -------------------------------------
+    getParents(task)
+    {
+        
     }
     // -------------------------------------
     // -------------------------------------
