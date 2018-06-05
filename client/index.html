@@ -12,6 +12,7 @@
   <script src="js/PotaGen.js"></script>
   <script src="js/PotaTool.js"></script>
   <script src="js/PotaKnow.js"></script>
+  <script src="js/game.js"></script>
   <script type="text/javascript">
   "use strict";
 
@@ -35,8 +36,6 @@
     var potaGen = new PotaGen(COLS, LIGS);
 
     var potaTool = new PotaTool(potaGen);
-      
-    var TOOLS = ['transplantoir','arrosoir','tomate','patate','chemin']
 
     var potaKnow = new PotaKnow(potaGen,potaTool,(str) => {
         console.log('say : ' + str);
@@ -46,7 +45,17 @@
     
     function potaChanged(event)
     {
-        console.log(event)
+        let durt = event.durt
+        let plant = event.plant
+        let x = event.x;
+        let y = event.y;
+        
+        if(event.type=='dig' || event.type=='bury')
+        {
+            let level = durt.level
+            let imageId = level+1
+            trouMap.putTile(imageId, x, y, trouLayer);
+        }
     }
       
     potaGen.register('Phaser',null,potaChanged)
@@ -61,22 +70,6 @@
 
     console.log("COLS : " + COLS);
     console.log("LIGS : " + LIGS);
-
-    var cell = { type: 0 };
-
-    var gameGrid = [];
-
-    for (let lig = 0; lig < LIGS; ++lig) {
-
-      gameGrid.push([]);
-
-      for (let col = 0; col < COLS; ++col) {
-
-        gameGrid[lig].push(cell);
-
-      }
-
-    }
 
     var game = new Phaser.Game(width, height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
@@ -93,6 +86,7 @@
       game.canvas.oncontextmenu = function(e) { e.preventDefault(); }
 
       game.load.spritesheet('ground_32x32', 'assets/TileSet.png', 32, 32);
+      game.load.spritesheet('trous_32x32', 'assets/trous.png',32,32);
       game.load.image('tools_64x64', 'assets/outils.png');
 
       game.load.spritesheet('pepper', 'assets/Pepper.png', 24, 32);
@@ -102,6 +96,8 @@
 
     var map;
     var toolsMap;
+    var trouLayer;
+    var trouMap;
     var layer1;
     var layer2;
     var playerLayer;
@@ -130,14 +126,20 @@
       map = game.add.tilemap();
 
       toolsMap = game.add.tilemap(null, HUD_CELL_SIZE, HUD_CELL_SIZE);
+        
+      trouMap = game.add.tilemap(null,32,32);
 
       //  Add a Tileset image to the map
       map.addTilesetImage('ground_32x32');
+      trouMap.addTilesetImage('trous_32x32');
+        
       toolsMap.addTilesetImage('tools_64x64');
+      trouMap.addTilesetImage('trous_32x32');
 
       //  Creates a new blank layer and sets the map dimensions.
       //  In this case the map is COLS x LIGS tiles in size and the tiles are CELL_SIZE x CELL_SIZE pixels in size.
       layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
+      trouLayer = trouMap.create('trou', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
       //  Our painting marker
 
@@ -239,7 +241,6 @@
     }
 
     function updateMarker(pointer,x,y,isClick) {
-      //console.log(pointer,x,y,isClick)
       let tileX = layer1.getTileX(game.input.activePointer.worldX);
       let tileY = layer1.getTileY(game.input.activePointer.worldY);
 
@@ -247,12 +248,16 @@
       marker.y = tileY * 32;
         
       //if (game.input.activePointer.leftButton.isDown) {
-        
-      let click = game.input.activePointer.leftButton.isDown?1:2
       
       if(isClick)
       {
-          console.log('ca')
+        
+          let click = 0;
+          if(pointer.leftButton.isDown)
+              click = 1;
+          if(pointer.rightButton.isDown)
+              click = 2;
+          
           let tileX = layer2.getTileX(marker.x);
           let tileY = layer2.getTileY(marker.y);
           
@@ -261,11 +266,14 @@
               hudLayer.getTileY(marker.y),hudLayer)
           if(toolSelection != null)
           {
-              var id = toolSelection.index
-              potaTool.setTool(id)
+              let id = toolSelection.index
+              let tool = potaTool.setTool(id)
+              console.log(tool)
           }
           else
-              potaTool.use(tileX,tileY);
+          {
+              let act = potaTool.use(tileX,tileY,click);
+          }
 
       }
 
@@ -334,7 +342,7 @@
 
       if (carrotVelocity.oldDirection != carrotVelocity.direction) {
 
-        console.log("carrot play " + 'walk_' + carrotVelocity.direction);
+        //console.log("carrot play " + 'walk_' + carrotVelocity.direction);
         carrotVelocity.oldDirection = carrotVelocity.direction;
         carrot.animations.play('walk_' + carrotVelocity.direction, 10, true);
       }

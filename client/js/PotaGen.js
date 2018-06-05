@@ -77,7 +77,7 @@ class PotaGen
         var wat = this.durt.xy_map[x][y].water
         if(wat==WATER_2ET)
         {
-            this.sendEvent({type:'water',x:x,y:x,
+            this.sendEvent({type:'water',x:x,y:y,
                 durt:this.durt.xy_map[x][y],
                 plant:this.seed.xy_map[x][y]})
             return TOO_WET
@@ -86,7 +86,7 @@ class PotaGen
         {
             wat += 1
             this.durt.xy_map[x][y].water = wat
-            this.sendEvent({type:'water',x:x,y:x,
+            this.sendEvent({type:'water',x:x,y:y,
                 durt:this.durt.xy_map[x][y],
                 plant:this.seed.xy_map[x][y]})
             return OK
@@ -110,7 +110,7 @@ class PotaGen
         }
         this.durt.xy_map[x][y].level = level
         this.sendEvent(
-            {type:amount>0?'dig':'bury',x:x,y:x,
+            {type:amount>0?'dig':'bury',x:x,y:y,
                 durt:this.durt.xy_map[x][y],
                 plant:this.seed.xy_map[x][y]})
         return ret
@@ -139,7 +139,7 @@ class PotaGen
             this.seed.xy_map[x][y][k] = plantType[k]
         }
         
-        this.sendEvent({type:'plant',x:x,y:x,
+        this.sendEvent({type:'plant',x:x,y:y,
                 durt:this.durt.xy_map[x][y],
                 plant:this.seed.xy_map[x][y]})
         return OK
