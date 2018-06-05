@@ -1,0 +1,131 @@
+<html>
+
+    <head>
+        <title>PotaGen test</title>
+        <meta charset="utf-8" />
+        <style>
+            body
+            {
+                overflow: hidden
+            }
+            #potager
+            {
+                background: url(test_asset/grass.jpg);
+                position: relative;
+            }
+            .durt
+            {
+                display:inline-block;
+                width:50px;
+                height:50px;
+                position: relative
+            }
+            .tool>img
+            {
+                width:40px;
+                height:40px;
+            }
+            .potager
+            {
+                float:left;
+                border-radius: 30px;
+                overflow: hidden;
+            }
+            .tools
+            {
+                float:left;
+            }
+            .seed
+            {
+                width:30px;
+                height:30px;
+                margin-top:10px;
+                margin-left:10px;
+            }
+            .stay
+            {
+                margin-top:0px;
+                margin-left:0px;
+                width:50px;
+                height:50px;
+            }
+            .durt>img
+            {
+                position: absolute;
+                top:0px;
+                left:0px;
+            }
+            .cursor
+            {
+                position: absolute;
+                background-repeat: no-repeat;
+                background-size: cover;
+                width:50px;
+                height:50px;
+                pointer-events: none;
+            }
+            .infos
+            {
+                position: relative;
+                pointer-events: none;
+            }
+            .infos:after
+            {
+                content:'';
+                width:100px;
+                height:100px;
+                top:20px;
+                right:0px;
+                background: url(test_asset/jardinier.png);
+                background-repeat: no-repeat;
+                background-size: contain;
+                position: absolute;
+            }
+        </style>
+    </head>
+    
+    <body oncontextmenu="return false;">
+        
+        <div id='potager'>
+            <div class='potager'></div>
+            <div class='tools'></div>
+        </div>
+        <u><div class='task'></div></u>
+        <br>
+        <div class='infos'></div>
+        <div class='cursor'></div>
+    
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="js/PotaCommon.js"></script>
+        <script src="js/PotaGen.js"></script>
+        <script src="js/PotaTool.js"></script>
+        <script src="js/PotaDraw.js"></script>
+        <script src="js/PotaKnow.js"></script>
+        <script>
+            
+            var synth = window.speechSynthesis
+            var said = []
+            function speek(str)
+            {
+                /*var spell = new SpeechSynthesisUtterance(str)
+                synth.speak(spell);*/
+                said.push(str)
+                $('.infos').html(str)
+            }
+            function task(str)
+            {
+                $('.task').html(str)
+            }
+            var potagen = new PotaGen(6,4)
+            var potatool = new PotaTool(potagen)
+
+            var potadraw = new PotaDraw(potagen,potatool)
+            potadraw.draw($('.potager'))
+
+            var potaknow = new PotaKnow(potagen,potatool,speek,task)
+            potaknow.nextKnowledge()
+        
+        </script>
+    </body>
+
+</html>
