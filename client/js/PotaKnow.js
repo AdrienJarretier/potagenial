@@ -205,7 +205,7 @@ function getKnowledgeGraph(plantations)
                     // -----------
                     knowledges['placer_cordeau'] =
                     {
-                        name:'placer le cordage',
+                        name:'placer le cordeau',
                         doneFunc:function(event)
                         {
                             if(event.type=='plant')
@@ -216,7 +216,7 @@ function getKnowledgeGraph(plantations)
                     }
                     knowledges['cordeau_optimise'] =
                     {
-                        name:'optimiser le cordage',
+                        name:'optimiser le cordeau',
                         doneFunc:function(event)
                         {
                             return true

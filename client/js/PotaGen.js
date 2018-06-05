@@ -144,4 +144,10 @@ class PotaGen
                 plant:this.seed.xy_map[x][y]})
         return OK
     }
+    // -------------------------------------------
+    getContent(x,y)
+    {
+        var cont = {durt:this.durt.xy_map[x][y],plant:this.seed.xy_map[x][y]}
+        return cont
+    }
 }

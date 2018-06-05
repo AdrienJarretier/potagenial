@@ -105,12 +105,16 @@
             
             var synth = window.speechSynthesis
             var said = []
+            setInterval(function(){
+                var phrase = said.slice(0,1)[0]
+                said = said.slice(1,said.length)
+                $('.infos').html(phrase)
+            },3000)
             function speek(str)
             {
                 /*var spell = new SpeechSynthesisUtterance(str)
                 synth.speak(spell);*/
                 said.push(str)
-                $('.infos').html(str)
             }
             function task(str)
             {
