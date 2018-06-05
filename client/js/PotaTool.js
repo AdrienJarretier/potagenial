@@ -42,16 +42,6 @@ class PotaTool
         })
         this.tool.push(
         {
-            name:'carrote',
-            plant:
-            {
-                seed:'carotte',
-                type:'multiply',
-                name:'carotte'
-            }
-        })
-        this.tool.push(
-        {
             name:'cordeau',
             plant:
             {

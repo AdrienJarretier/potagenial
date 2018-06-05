@@ -8,8 +8,10 @@
 </head>
 
 <body>
+  <script src="js/PotaCommon.js"></script>
   <script src="js/PotaGen.js"></script>
   <script src="js/PotaTool.js"></script>
+  <script src="js/PotaKnow.js"></script>
   <script type="text/javascript">
   "use strict";
 
@@ -32,22 +34,22 @@
 
     var potaGen = new PotaGen(COLS, LIGS);
 
-    var potaTool = new PotaTool(potaGen, { x: 5, y: 5 });
+    var potaTool = new PotaTool(potaGen);
+      
+    var TOOLS = ['transplantoir','arrosoir','tomate','patate','chemin']
 
-    // PotaKnow(potagen,potatool,(event) => {
-
-    //     console.log('potagen modified');
-    //     console.log(event);
-
-    // },(str) => {
-
-    //     console.log('say : ' + str);
-
-    // },(str) => {
-
-    //     console.log('task changed : ' + str);
-
-    // });
+    var potaKnow = new PotaKnow(potaGen,potaTool,(str) => {
+        console.log('say : ' + str);
+    },(str) => {
+        console.log('task changed : ' + str);
+    });
+    
+    function potaChanged(event)
+    {
+        console.log(event)
+    }
+      
+    potaGen.register('Phaser',null,potaChanged)
 
     console.log(potaGen.getContent(0, 0));
 
@@ -91,7 +93,7 @@
       game.canvas.oncontextmenu = function(e) { e.preventDefault(); }
 
       game.load.spritesheet('ground_32x32', 'assets/TileSet.png', 32, 32);
-      game.load.image('tools_64x64', 'assets/farm_tool_icons_calciumtrice.png');
+      game.load.image('tools_64x64', 'assets/outils.png');
 
       game.load.spritesheet('pepper', 'assets/Pepper.png', 24, 32);
       game.load.spritesheet('carrot', 'assets/Carrot.png', 24, 32);
@@ -191,8 +193,12 @@
       playerLayer = map.createBlankLayer('playerLayer', COLS, LIGS, CELL_SIZE, CELL_SIZE);
 
       hudLayer = toolsMap.create('hud', HUD_COLS, HUD_LIGS, HUD_CELL_SIZE, HUD_CELL_SIZE);
-
-      toolsMap.putTile(2, Math.floor(HUD_COLS / 2), HUD_LIGS - 1, hudLayer);
+        
+      for(var k in potaTool.tool)
+      {
+        k = parseInt(k)
+        toolsMap.putTile(k, k, HUD_LIGS - 1, hudLayer);
+      }
 
       pepper = game.add.sprite(width / 2, height / 2, 'pepper');
 
@@ -232,27 +238,39 @@
 
     }
 
-    function updateMarker() {
-
+    function updateMarker(pointer,x,y,isClick) {
+      //console.log(pointer,x,y,isClick)
       let tileX = layer1.getTileX(game.input.activePointer.worldX);
       let tileY = layer1.getTileY(game.input.activePointer.worldY);
 
       marker.x = tileX * 32;
       marker.y = tileY * 32;
-
-
-      if (game.input.activePointer.leftButton.isDown) {
-
-        let tileX = layer2.getTileX(marker.x);
-        let tileY = layer2.getTileY(marker.y);
-
-        map.putTile(1, tileX, tileY, layer2);
-
-        // potaTool.use(tileX, tilesY, );
+        
+      //if (game.input.activePointer.leftButton.isDown) {
+        
+      let click = game.input.activePointer.leftButton.isDown?1:2
+      
+      if(isClick)
+      {
+          console.log('ca')
+          let tileX = layer2.getTileX(marker.x);
+          let tileY = layer2.getTileY(marker.y);
+          
+          var toolSelection = toolsMap.getTile(
+              hudLayer.getTileX(marker.x),
+              hudLayer.getTileY(marker.y),hudLayer)
+          if(toolSelection != null)
+          {
+              var id = toolSelection.index
+              potaTool.setTool(id)
+          }
+          else
+              potaTool.use(tileX,tileY);
 
       }
 
-      if (game.input.activePointer.rightButton.isDown) {
+      if (game.input.activePointer.rightButton.isDown) 
+      {
 
         map.removeTile(layer2.getTileX(marker.x), layer2.getTileY(marker.y), layer2);
 
