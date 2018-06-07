@@ -1,30 +1,190 @@
-window.onload(function()
+window.onload = function()
 {
     
 // -----------------------------------------------------------------------
 // --------------------------------------------------------- INIT --------
     
     const TARGET_WIDTH = Math.floor(1920 / 2 * 0.9);
-    const CELL_SIZE = 32;
+    const CELL_SIZE = 64;
     const HUD_CELL_SIZE = 64;
-    const ASPECT_RATIO = 16 / 9;
-    const COLS = Math.floor(TARGET_WIDTH / CELL_SIZE);
-    const LIGS = Math.floor(COLS / ASPECT_RATIO);
+    
+    // -- info potager
+    const POTAGER_COLS = 7;
+    const POTAGER_ROWS = 5;
 
-    const HUD_COLS = Math.floor(TARGET_WIDTH / HUD_CELL_SIZE);
-    const HUD_LIGS = Math.floor(HUD_COLS / ASPECT_RATIO);
+    // -- game size
+    const width = (POTAGER_COLS + 2) * CELL_SIZE;
+    const height = (POTAGER_ROWS + 3) * CELL_SIZE;
 
-    const width = COLS * CELL_SIZE;
-    const height = LIGS * CELL_SIZE;
-
-    var potaGen = new PotaGen(COLS, LIGS);
+    // -- models
+    var potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
     var potaTool = new PotaTool(potaGen);
     var potaKnow = new PotaKnow(potaGen,potaTool,(str) => {
         console.log('say : ' + str);
     },(str) => {
         console.log('task changed : ' + str);
     });
+    potaGen.register('phaser',null,potager_update)
 
+    // -----------------------------------------------------------------------
+    // --------------------------------------------------- POTAUPDATE --------
+    function potager_update(event)
+    {
+        var seedMap =
+        {
+            potato:racines_patate_0,
+            seed:racines_seed_0,
+        }
+        let x = event.x;
+        let y = event.y;
+        let type = event.type;
+        let durt = event.durt;
+        let plant = event.plant;
+        
+        if(type=='dig' || type=='bury')
+        {
+            let ret = createHoles(potaGen,x,y,[])
+            
+            if(plant.name!='NO PLANT')
+            {
+                let seePlant = durt.level>=plant.level
+                if(seePlant)
+                    setRacine(seedMap[plant.seed],x,y)
+                else
+                    setRacine(-1,x,y)
+            }
+        }
+        
+        if(type=='plant')
+        {
+            let seed = seedMap[plant.seed];
+            setRacine(seed,x,y)
+        }
+    }
+    // -----------------------------------------------------------------------
+    // ------------------------------------------------------ SETTILE --------
+    function createHoles(potaGen,x,y,forget)
+    {
+        if(x<0 || y<0 || x>POTAGER_COLS-1 || y>POTAGER_ROWS-1)
+            return false;
+        
+        let myIndex = x+y*POTAGER_COLS;
+        if(forget.indexOf(myIndex)>-1)
+            return potaGen.durt.xy_map[x][y].level==DEEP_LEVEL;
+        
+        forget.push(myIndex);
+        let left = createHoles(potaGen,x-1,y,forget);
+        let right = createHoles(potaGen,x+1,y,forget);
+        let up = createHoles(potaGen,x,y-1,forget);
+        let down = createHoles(potaGen,x,y+1,forget);
+        
+        if(potaGen.durt.xy_map[x][y].level!=DEEP_LEVEL)
+        {
+            setTranche(-1,x,y)
+            setTrou(potaGen.durt.xy_map[x][y].level+1,x,y)
+            return false
+        }
+        else
+        {
+            setTrou(-1,x,y)
+        }
+        
+        if(!(left||right||up||down))
+        {
+            setTrou(trous_deep,x,y)
+        }
+        else if(left&&right&&up&&down)
+        {
+            setTranche(tranche_x,x,y)
+        }
+        else if(left&&right&&up)
+        {
+            setTranche(tranche_t_up,x,y)
+        }
+        else if(left&&right&&down)
+        {
+            setTranche(tranche_t_down,x,y)
+        }
+        else if(left&&up&&down)
+        {
+            setTranche(tranche_t_left,x,y)
+        }
+        else if(right&&up&&down)
+        {
+            setTranche(tranche_t_right,x,y)
+        }
+        else if(down&&right)
+        {
+            setTranche(tranche_l_down,x,y)
+        }
+        else if(left&&down)
+        {
+            setTranche(tranche_l_left,x,y)
+        }
+        else if(up&&right)
+        {
+            setTranche(tranche_l_right,x,y)
+        }
+        else if(up&&left)
+        {
+            setTranche(tranche_l_up,x,y)
+        }
+        else if(up&&down)
+        {
+            setTranche(tranche_h_up,x,y)
+        }
+        else if(left&&right)
+        {
+            setTranche(tranche_h_left,x,y)
+        }
+        else if(left)
+        {
+            setTranche(tranche_left,x,y)
+        }
+        else if(right)
+        {
+            setTranche(tranche_right,x,y)
+        }
+        else if(up)
+        {
+            setTranche(tranche_up,x,y)
+        }
+        else if(down)
+        {
+            setTranche(tranche_down,x,y)
+        }
+        return true;
+    }
+    function setTile(map,tileId,x,y,layer)
+    {
+        if(tileId==-1)
+        {
+            map.removeTile(x,y,layer)
+            return
+        }
+        map.putTile(tileId,x,y,layer)
+    }
+    function setTranche(tileId,x,y)
+    {
+        setTile(tranchesMap,tileId,x+1,y+1,tranchesLayer)
+    }
+    function setTrou(tileId,x,y)
+    {
+        setTile(trousMap,tileId,x+1,y+1,trousLayer)
+    }
+    function setRacine(tileId,x,y)
+    {
+        setTile(racinesMap,tileId,x+1,y+1,racinesLayer)
+    }
+    function setPlante(tileId,x,y)
+    {
+        setTile(plantesMap,tileId,x+1,y+1,plantesLayer)
+    }
+    function setFruit(tileId,x,y)
+    {
+        setTile(fruitsMap,tileId,x+1,y+1,fruitsLayer)
+    }
+    
     // -----------------------------------------------------------------------
     // --------------------------------------------------------- GAME --------
 
@@ -33,20 +193,12 @@ window.onload(function()
 
     // -----------------------------------------------------------------------
     // ----------------------------------------------------- PRE-LOAD --------
-    
-    var potagerMap;
-    var outilsMap;
-    var trousMap;
-    var racinesMap;
-    var plantesMap;
-    var infoPlantesMap;
     // -------------------
     function preload()
     {
         /*
         game.canvas.oncontextmenu = function(e) { e.preventDefault(); }
 
-        game.load.spritesheet('ground_32x32', 'assets/TileSet.png', 32, 32);
         game.load.spritesheet('trous_32x32', 'assets/trous.png',32,32);
         game.load.image('tools_64x64', 'assets/outils.png');
 
@@ -54,142 +206,204 @@ window.onload(function()
         game.load.spritesheet('carrot', 'assets/Carrot.png', 24, 32);
         */
         
-        // SPRITE POTAGER
+        game.canvas.oncontextmenu = function(e) { e.preventDefault(); }
         // SPRITE OUTILS
+        game.load.spritesheet('outils', 'assets/outils.png', CELL_SIZE, CELL_SIZE);
+        // SPRITE POTAGER
+        game.load.spritesheet('fences', 'assets/fences.png', CELL_SIZE, CELL_SIZE);
+        game.load.spritesheet('tranches', 'assets/tranches.png', CELL_SIZE, CELL_SIZE);
         // SPRITE TROUS
+        game.load.spritesheet('trous', 'assets/trous.png', CELL_SIZE, CELL_SIZE);
         // SPRITE ROOT
+        game.load.spritesheet('racines', 'assets/racines.png', CELL_SIZE, CELL_SIZE);
         // SPRITE PLANTE
+        game.load.spritesheet('plantes', 'assets/plantes.png', CELL_SIZE, CELL_SIZE);
         // SPRITE INFOPLANTE
+        game.load.spritesheet('fruits', 'assets/fruits.png', CELL_SIZE, CELL_SIZE);
+        // SPRITE EAU
     }
     
     // -----------------------------------------------------------------------
     // ------------------------------------------------------- CREATE --------
     
-    var potagerLayer;
+    var outilsMap;
+    var potagerMap;
+    var tranchesMap;
+    var trousMap;
+    var racinesMap;
+    var eauMap;
+    var plantesMap;
+    var fruitsMap;
+    
     var outilsLayer;
+    var potagerLayer;
+    var tranchesLayer;
     var trousLayer;
     var racinesLayer;
     var plantesLayer;
-    var infoPlantesLayer;
+    var fruitsLayer;
+    
+    var fences_up = 0;
+    var fences_down = 1;
+    var fences_left = 2;
+    var fences_right = 3;
+    var fences_up_left = 4;
+    var fences_up_right = 5;
+    var fences_down_left = 6;
+    var fences_down_right = 7;
+    var fences_terre = 8;
+    var fences_herbe = 9;
+    
+    var tranche_left = 0;
+    var tranche_right = 1;
+    var tranche_up = 2;
+    var tranche_down = 3;
+    var tranche_t_left = 4;
+    var tranche_t_right = 5;
+    var tranche_t_up = 6;
+    var tranche_t_down = 7;
+    var tranche_l_left = 8;
+    var tranche_l_right = 9;
+    var tranche_l_up = 10;
+    var tranche_l_down = 11;
+    var tranche_h_left = 12;
+    var tranche_h_up = 13;
+    var tranche_x = 14;
+    
+    var trous_pile = 0;
+    var trous_zero = 1;
+    var trous_medium = 2;
+    var trous_deep = 3;
+    
+    var racines_patate_0 = 0;
+    var racines_patate_1 = 1;
+    var racines_seed_0 = 2;
+    var racines_seed_1 = 3;
+    
+    var plantes_grow_0 = 0;
+    var plantes_grow_1 = 1;
+    var plantes_grow_2 = 2;
+    var plantes_tiges = 3;
+    var plantes_feuilles = 4;
+    
+    var fruits_tomate = 0;
+    
+    var marker;
     // -------------------
     function create()
     {
-        game.world.setBounds(-width / 2, -height / 2, width * 2, height * 2);
-      game.add.tileSprite(-width / 2, -height / 2, width * 2, height * 2, 'ground_32x32', 12);
-
-      //  Creates a blank tilemap
-      map = game.add.tilemap();
-
-      toolsMap = game.add.tilemap(null, HUD_CELL_SIZE, HUD_CELL_SIZE);
+        // -- MAPS
+        potagerMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        potagerMap.addTilesetImage('fences');
+        potagerLayer = potagerMap.create(
+            'potager', POTAGER_COLS+2, POTAGER_ROWS+3, CELL_SIZE, CELL_SIZE);
         
-      trouMap = game.add.tilemap(null,32,32);
-
-      //  Add a Tileset image to the map
-      map.addTilesetImage('ground_32x32');
-      trouMap.addTilesetImage('trous_32x32');
+        tranchesMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        tranchesMap.addTilesetImage('tranches');
+        tranchesLayer = tranchesMap.create(
+            'tranches', POTAGER_COLS+2, POTAGER_ROWS+3, CELL_SIZE, CELL_SIZE);
         
-      toolsMap.addTilesetImage('tools_64x64');
-      trouMap.addTilesetImage('trous_32x32');
-
-      //  Creates a new blank layer and sets the map dimensions.
-      //  In this case the map is COLS x LIGS tiles in size and the tiles are CELL_SIZE x CELL_SIZE pixels in size.
-      layer1 = map.create('level1', COLS, LIGS, CELL_SIZE, CELL_SIZE);
-      trouLayer = trouMap.create('trou', COLS, LIGS, CELL_SIZE, CELL_SIZE);
-
-      //  Our painting marker
-
-      marker = game.add.graphics();
-      marker.lineStyle(2, 0x000000, 1);
-      marker.drawRect(0, 0, 32, 32);
-
-      game.input.addMoveCallback(updateMarker, this);
-
-
-      map.fill(0, 0, 0, COLS, LIGS);
-
-      for (let i = 0; i < COLS; ++i) {
-
-        map.putTile(60, i, LIGS - 1, layer1);
-        map.putTile(60, i, 0, layer1);
-
-      }
-
-      for (let i = 0; i < LIGS; ++i) {
-
-        map.putTile(61, 0, i, layer1);
-        map.putTile(61, COLS - 1, i, layer1);
-
-      }
-
-      for (let i = 1; i < COLS - 1; ++i) {
-
-        map.putTile(2, i, LIGS - 2, layer1);
-        map.putTile(3, i, 1, layer1);
-
-      }
-
-      for (let i = 1; i < LIGS - 1; ++i) {
-
-        map.putTile(4, 1, i, layer1);
-        map.putTile(5, COLS - 2, i, layer1);
-
-      }
-
-      for (let i = 0; i < 2; ++i) {
-        for (let j = 0; j < 2; ++j) {
-
-          map.putTile(i * 2 + j + 6, (COLS - 3) * j + 1, (LIGS - 2) - (LIGS - 3) * i, layer1);
-
-          map.putTile(i * 2 + j + 62, (COLS - 1) * j, (LIGS - 1) * i, layer1);
-
+        trousMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        trousMap.addTilesetImage('trous');
+        trousLayer = trousMap.create(
+            'trous', POTAGER_COLS+2, POTAGER_ROWS+2, CELL_SIZE, CELL_SIZE);
+        
+        racinesMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        racinesMap.addTilesetImage('racines');
+        racinesLayer = racinesMap.create(
+            'racines', POTAGER_COLS+2, POTAGER_ROWS+2, CELL_SIZE, CELL_SIZE);
+        
+        plantesMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        plantesMap.addTilesetImage('plantes');
+        plantesLayer = plantesMap.create(
+            'plantes', POTAGER_COLS+2, POTAGER_ROWS+2, CELL_SIZE, CELL_SIZE);
+        
+        fruitsMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        fruitsMap.addTilesetImage('fruits');
+        fruitsLayer = fruitsMap.create(
+            'fruits', POTAGER_COLS+2, POTAGER_ROWS+2, CELL_SIZE, CELL_SIZE);
+        
+        outilsMap =  game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+        outilsMap.addTilesetImage('outils');
+        outilsLayer = outilsMap.create(
+            'outils', POTAGER_COLS+2, POTAGER_ROWS+3, CELL_SIZE, CELL_SIZE);
+        
+        // -- Setup tools
+        for(let k in potaTool.tool)
+            outilsMap.putTile(k,parseInt(k)+1,POTAGER_ROWS+2,outilsLayer)
+        
+        // -- Setup potager
+        for(let i=0;i<POTAGER_COLS+2;++i)
+        {
+            for(let j=0;j<POTAGER_ROWS+2;++j)
+            {
+                let tileId = fences_terre;
+                if(i==0)
+                    if(j==0)
+                        tileId = fences_up_left;
+                    else if(j==POTAGER_ROWS+1)
+                        tileId = fences_down_left;
+                    else
+                        tileId = fences_left;
+                else if(i==POTAGER_COLS+1)
+                    if(j==0)
+                        tileId = fences_up_right;
+                    else if(j==POTAGER_ROWS+1)
+                        tileId = fences_down_right;
+                    else
+                        tileId = fences_right;
+                else if(j==0)
+                    tileId = fences_up;
+                else if(j==POTAGER_ROWS+1)
+                    tileId = fences_down;
+                potagerMap.putTile(tileId,i,j,potagerLayer)
+            }
         }
-      }
-
-      layer2 = map.createBlankLayer('level2', COLS, LIGS, CELL_SIZE, CELL_SIZE);
-
-      playerLayer = map.createBlankLayer('playerLayer', COLS, LIGS, CELL_SIZE, CELL_SIZE);
-
-      hudLayer = toolsMap.create('hud', HUD_COLS, HUD_LIGS, HUD_CELL_SIZE, HUD_CELL_SIZE);
+        for(let i=0;i<POTAGER_COLS+2;++i)
+        {
+            potagerMap.putTile(fences_herbe,i,POTAGER_ROWS+2,potagerLayer)
+        }
         
-      for(var k in potaTool.tool)
-      {
-        k = parseInt(k)
-        toolsMap.putTile(k, k, HUD_LIGS - 1, hudLayer);
-      }
+        marker = game.add.graphics();
+        marker.lineStyle(2, 0x000000, 1);
+        marker.drawRect(0, 0, 64, 64);
+        
+        game.input.addMoveCallback(updateMarker, this);
+    }
 
-      pepper = game.add.sprite(width / 2, height / 2, 'pepper');
+    // -----------------------------------------------------------------------
+    // ------------------------------------------------------- UPDATE --------
+    function updateMarker(pointer,x,y,isClick)
+    {
+        let tileX = potagerLayer.getTileX(game.input.activePointer.worldX);
+        let tileY = potagerLayer.getTileY(game.input.activePointer.worldY);
 
+        marker.x = tileX * 64;
+        marker.y = tileY * 64;
 
+        if(isClick)
+        {
+            let click = 0;
+            if(pointer.leftButton.isDown)
+            click = 1;
+            if(pointer.rightButton.isDown)
+            click = 2;
 
-      carrot = game.add.sprite(-CELL_SIZE, -CELL_SIZE, 'carrot');
-      carrot.smoothed = false;
-      carrot.scale.set(1.5);
-
-
-      carrot.animations.add('walk_up', [0, 1, 2]);
-      carrot.animations.add('walk_right', [3, 4, 5]);
-      carrot.animations.add('walk_left', [9, 10, 11]);
-      carrot.animations.add('walk_down', [6, 7, 8]);
-
-
-
-
-      game.physics.enable(pepper, Phaser.Physics.arcade);
-
-      game.physics.arcade.setBounds(CELL_SIZE / 2, 0, width - CELL_SIZE, height - CELL_SIZE);
-
-      pepper.body.collideWorldBounds = true;
-
-
-      //game.camera.follow(pepper);
-
-      pepper.scale.set(2);
-      pepper.smoothed = false;
-
-      pepper.animations.add('walk_up', [0, 1, 2]);
-      pepper.animations.add('walk_right', [3, 4, 5]);
-      pepper.animations.add('walk_left', [9, 10, 11]);
-      pepper.animations.add('walk_down', [6, 7, 8]);
+            var toolSelection = outilsMap.getTile(
+            outilsLayer.getTileX(tileX * 64),
+            outilsLayer.getTileY(tileY * 64),outilsLayer)
+            
+            if(toolSelection != null)
+            {
+                let id = toolSelection.index
+                let tool = potaTool.setTool(id)
+            }
+            else if(tileX>0 && tileY>0
+                    && tileX<POTAGER_COLS+1 && tileY<POTAGER_ROWS+1)
+            {
+                let act = potaTool.use(tileX-1,tileY-1,click);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -199,6 +413,4 @@ window.onload(function()
     {
         
     }
-
-    
-})
+}
