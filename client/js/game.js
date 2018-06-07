@@ -88,6 +88,7 @@ window.onload = function()
         {
             setTrou(-1,x,y)
         }
+        setTranche(-1,x,y)
         
         if(!(left||right||up||down))
         {

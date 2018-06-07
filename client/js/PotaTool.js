@@ -26,8 +26,15 @@ class PotaTool
             name:'tomato',
             plant:
             {
+                name:'tomato',
                 seed:'seed',
-                name:'tomato'
+                above:2,
+                plante:['grow_0','grow_1','grow_2'],
+                fruit:'tomate',
+                grown:
+                {
+                    seed:'potato_1,'
+                }
             }
         })
         this.tool.push(
@@ -36,8 +43,13 @@ class PotaTool
             plant:
             {
                 seed:'potato',
-                type:'multiply',
-                name:'potato'
+                plante:'grow_0',
+                name:'potato',
+                grown:
+                {
+                    plante:'feuilles',
+                    seed:'potato_1,'
+                }
             }
         })
         this.tool.push(
