@@ -27,7 +27,12 @@ class PotaTool
             plant:
             {
                 seed:'seed',
-                name:'tomato'
+                name:'tomato',
+                fruit:'tomato',
+                above:2,
+                water:1,
+                cycles:3,
+                plant:'plante'
             }
         })
         this.tool.push(
@@ -36,8 +41,22 @@ class PotaTool
             plant:
             {
                 seed:'potato',
-                type:'multiply',
-                name:'potato'
+                seedDone:'potatos',
+                name:'potato',
+                above:3,
+                water:2,
+                cycles:4,
+                plant:'feuille'
+            }
+        })
+        this.tool.push(
+        {
+            name:'chemin',
+            plant:
+            {
+                seed:'chemin',
+                type:'stay',
+                name:'chemin'
             }
         })
         this.tool.push(
@@ -45,24 +64,14 @@ class PotaTool
             name:'cordeau',
             plant:
             {
-                seed:'cordeauCorde',
+                seed:'cordeau',
                 type:'stay',
                 name:'cordeau'
             }
         })
-        this.tool.push(
-        {
-            name:'gravier',
-            plant:
-            {
-                seed:'gravier',
-                type:'stay',
-                name:'gravier'
-            }
-        })
         this.curTool = null
     }
-    
+
     setTool(id)
     {
         this.curTool = this.tool[id]

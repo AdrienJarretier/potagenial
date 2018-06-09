@@ -16,6 +16,7 @@ class PotaGen
         this.callbacks = {}
         this.durt = {'xy_map':{},'array':[]}
         this.seed = {'xy_map':{},'array':[]}
+        this.pickedPlant = []
         this.tools = []
         this.curTool = null
         this.tools.push(
@@ -46,7 +47,7 @@ class PotaGen
         this.width = w
         this.height = h
         this.initVars()
-        
+
         for(let i=0;i<w;++i)
         {
             this.durt.xy_map[i] = {}
@@ -72,6 +73,47 @@ class PotaGen
         }
     }
     // -------------------------------------------
+    newCycle()
+    {
+        for(let k in this.seed.array)
+        {
+            let plant = this.seed.array[k]
+            let durt = this.durt.array[k]
+
+            let water = durt.water
+            let x = durt.x
+            let y = durt.y
+            if(plant.name != 'NO PLANT' && plant.grow>=0)
+            {
+                let level = plant.level
+                let dLevel = durt.level
+                let needWater = plant.water
+                let above = level - dLevel
+                let needAbove = plant.above
+                let missingAbove = above - needAbove
+                if(missingAbove == 0)
+                {
+                    console.log(water,needWater)
+                    if(water == needWater)
+                    {
+                        let adder = 1/plant.cycles
+                        plant.grow += adder
+                        this.sendEvent({type:'grow',x:x,y:y,
+                            durt:this.durt.xy_map[x][y],
+                            plant:this.seed.xy_map[x][y]})
+                    }
+                }
+            }
+            if(water > 0)
+            {
+                durt.water -= 1
+                this.sendEvent({type:'water',x:x,y:y,
+                    durt:this.durt.xy_map[x][y],
+                    plant:this.seed.xy_map[x][y]})
+            }
+        }
+    }
+    // -------------------------------------------
     water(x,y)
     {
         var wat = this.durt.xy_map[x][y].water
@@ -93,10 +135,27 @@ class PotaGen
         }
     }
     // -------------------------------------------
+    pickUpPlant(x,y)
+    {
+        var plant = this.seed.xy_map[x][y]
+        this.pickedPlant.push(plant)
+        this.seed.xy_map[x][y] = {name:'NO PLANT'}
+        this.sendEvent(
+            {type:'pickedPlant',x:x,y:y,
+                durt:this.durt.xy_map[x][y],
+                picked:plant,
+                plant:this.seed.xy_map[x][y]})
+    }
+    // -------------------------------------------
     moveDurt(x,y,amount)
     {
         var ret = OK
         var level = this.durt.xy_map[x][y].level
+        var plant = this.seed.xy_map[x][y]
+        if(plant.name != 'NO PLANT' && level==plant.level)
+        {
+            this.pickUpPlant(x,y)
+        }
         level += amount
         if(level<PILE_LEVEL)
         {
@@ -129,16 +188,18 @@ class PotaGen
     }
     // -------------------------------------------
     plant(x,y,plantType)
-    {        
+    {
         if(this.seed.xy_map[x][y].hasOwnProperty('grow'))
             return SEED_ALREADY_IN
         this.seed.xy_map[x][y]['grow'] = 0
+        this.seed.xy_map[x][y]['x'] = x
+        this.seed.xy_map[x][y]['y'] = y
         this.seed.xy_map[x][y]['level'] = this.durt.xy_map[x][y].level
         for(var k in plantType)
         {
             this.seed.xy_map[x][y][k] = plantType[k]
         }
-        
+
         this.sendEvent({type:'plant',x:x,y:y,
                 durt:this.durt.xy_map[x][y],
                 plant:this.seed.xy_map[x][y]})

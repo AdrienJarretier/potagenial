@@ -1,6 +1,8 @@
+"use strict";
 var potaKnow;
 
 function gameLoaded() {}; // function called when the game is created
+function updateCycle() {};
 
 window.onload = function() {
 
@@ -27,6 +29,8 @@ window.onload = function() {
   var potaTool = new PotaTool(potaGen);
 
   var queue = async.queue(function(str, func) {
+    if(queue.length()>0)
+        str += '...'
     talkerInfos.context = str
     if (talker != null)
       talker.destroy()
@@ -34,62 +38,131 @@ window.onload = function() {
     talker.showTooltip()
     tractorSpeak()
 
-    setTimeout(func, str.length*60);
+    setTimeout(func, str.length * 60);
 
   }, 1);
 
+  var lastStr = '';
   function speak(str) {
-    queue.push(str)
+    if(lastStr != str)
+        queue.push(str)
+    lastStr = str
   }
 
   function doneSpeaking(func) {
-    if(queue.length()==0)
-        func.call(potaKnow)
+    if (queue.length() == 0)
+      func.call(potaKnow)
     else
-        queue.drain=function(){
+      queue.drain = function() {
         func.call(potaKnow)
-        queue.drain = function(){}
-    }
+        queue.drain = function() {}
+      }
+  }
 
-}
+  function newTask(str)
+  {
+    currentTaskInfos.context = str
+    if (currentTask != null)
+      currentTask.destroy()
+    currentTask = new Phasetips(game, currentTaskInfos)
+    currentTask.showTooltip()
+  }
 
-  potaKnow = new PotaKnow(potaGen, potaTool, speak, doneSpeaking, (str) => {
-    console.log('task changed : ' + str);
-  });
+  potaKnow = new PotaKnow(potaGen, potaTool, speak, doneSpeaking, newTask);
   potaGen.register('phaser', null, potager_update)
+
+  updateCycle = function(){potaGen.newCycle.call(potaGen)}
 
   // -----------------------------------------------------------------------
   // --------------------------------------------------- POTAUPDATE --------
   function potager_update(event) {
-    var seedMap = {
-      potato: racines_patate_0,
-      seed: racines_seed_0,
-    }
+
+    console.log(event)
     let x = event.x;
     let y = event.y;
     let type = event.type;
     let durt = event.durt;
     let plant = event.plant;
+    let water = durt.water
 
     if (type == 'dig' || type == 'bury') {
       let ret = createHoles(potaGen, x, y, [])
 
       if (plant.name != 'NO PLANT') {
-        let seePlant = durt.level >= plant.level
-        if (seePlant)
-          setRacine(seedMap[plant.seed], x, y)
-        else
-          setRacine(-1, x, y)
+        drawPlant(plant,durt,x,y)
       }
     }
-
-    if (type == 'plant') {
-      let seed = seedMap[plant.seed];
-      setRacine(seed, x, y)
+    else if (type == 'plant' || type=='grow' || type=='pickedPlant') {
+        drawPlant(plant,durt,x,y)
     }
+    /*
+    else if(type == 'water')
+    {
+        let mouille = game.add.graphics()
+        mouille.beginFill(0x000000,water/4)
+        mouille.drawCircle(0,0,CELL_SIZE)
+        let tex = mouille.generateTexture()
+        game.add.sprite((x+1)*CELL_SIZE,(y+1)*CELL_SIZE,tex)
+    }*/
   }
   // -----------------------------------------------------------------------
   // ------------------------------------------------------ SETTILE --------
+  function drawPlant(plant,durt,x,y)
+  {
+    if(plant.name == 'NO PLANT')
+    {
+        setRacine(-1, x, y)
+        setFruit(-1,x,y)
+        setPlante(-1, x, y)
+        return
+    }
+    var seedMap = {
+      potato: racines_patate_0,
+      seed: racines_seed_0,
+    }
+
+    var doneSeedMap = {
+        potato:1,
+        seed:3,
+    }
+
+    var planteMap = {
+        plante:[0,1,2],
+        feuille:[0,4],
+        tige:[0,3],
+    }
+
+    let fruitMap = {
+        tomato:0
+    }
+
+    let grow = plant.grow
+    let plantName = plant.plant
+
+    let seed = seedMap[plant.seed];
+    let seedDone = doneSeedMap[plant.seed];
+    let seeSeed = durt.level >= plant.level
+    if (seeSeed)
+        if(plant.grow == 1)
+            setRacine(seedDone, x, y)
+        else
+            setRacine(seed, x, y)
+    else
+      setRacine(-1, x, y)
+
+    let plante = planteMap[plantName]
+    let mapId = Math.floor(grow*(plante.length-1))
+    let planteId = plante[mapId]
+    setPlante(planteId, x, y)
+
+    if(plant.hasOwnProperty('fruit') && plant.grow == 1)
+    {
+        let fruit = plant.fruit
+        let fruitId = fruitMap[fruit]
+        setFruit(fruitId,x,y)
+    }
+  }
+  // ---------------------------------
   function createHoles(potaGen, x, y, forget) {
     if (x < 0 || y < 0 || x > POTAGER_COLS - 1 || y > POTAGER_ROWS - 1)
       return false;
@@ -247,6 +320,7 @@ window.onload = function() {
   var tractorAnim;
 
   var outilsLayer;
+  var monOutilLayer;
   var potagerLayer;
   var tranchesLayer;
   var trousLayer;
@@ -300,10 +374,12 @@ window.onload = function() {
   var fruits_tomate = 0;
 
   var tractorBreathAnim;
-  var tractorSpeackAnim;
+  var tractorSpeakAnim;
 
   var talker;
   var talkerInfos;
+  var currentTask;
+  var currentTaskInfos;
 
   var marker;
   // -------------------
@@ -350,6 +426,10 @@ window.onload = function() {
     tractorBreathAnim = tractorAnim.animations.add('breath', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 15);
     tractorSpeakAnim = tractorAnim.animations.add('speak', [14, 15, 16, 17], 10);
 
+    marker = game.add.graphics();
+    marker.lineStyle(2, 0x000000, 1);
+    marker.drawRect(0, 0, 64, 64);
+
     // -- Setup tools
     for (let k in potaTool.tool)
       outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
@@ -390,14 +470,9 @@ window.onload = function() {
       }
     }
 
-    marker = game.add.graphics();
-    marker.lineStyle(2, 0x000000, 1);
-    marker.drawRect(0, 0, 64, 64);
-
     tractorBreath();
 
     game.input.addMoveCallback(updateMarker, this);
-
 
     talkerInfos = {
       context: "BANDE DE CONS",
@@ -415,6 +490,23 @@ window.onload = function() {
       alwaysOn: true
     }
 
+    currentTaskInfos = {
+      context: "BANDE DE CONS",
+      font: "Comic sans ms",
+      fontSize: 15,
+      width: 180,
+      fontStroke: "#cec3a4",
+      fontFill: "#cec3a4",
+      backgroundColor: 0x005511,
+      strokeColor: 0x005511,
+      strokeWeight: 5,
+      roundedCornersRadius: 0,
+      y: CELL_SIZE*(tROWS-2),
+      x: CELL_SIZE*(POTAGER_COLS+1),
+      disableInputEvents: true,
+      alwaysOn: true
+    }
+
     gameLoaded();
   }
 
@@ -424,8 +516,13 @@ window.onload = function() {
     let tileX = potagerLayer.getTileX(game.input.activePointer.worldX);
     let tileY = potagerLayer.getTileY(game.input.activePointer.worldY);
 
-    marker.x = tileX * 64;
-    marker.y = tileY * 64;
+    if (monOutilLayer != null) {
+      monOutilLayer.x = x + CELL_SIZE / 5
+      monOutilLayer.y = y - CELL_SIZE / 2
+    }
+
+    marker.x = tileX * CELL_SIZE;
+    marker.y = tileY * CELL_SIZE;
 
     if (isClick) {
       let click = 0;
@@ -439,7 +536,13 @@ window.onload = function() {
         outilsLayer.getTileY(tileY * 64), outilsLayer)
 
       if (toolSelection != null) {
-        let id = toolSelection.index
+        let id = parseInt(toolSelection.index)
+        if (monOutilLayer == null) {
+          monOutilLayer = game.add.sprite(0, 0, 'outils');
+          monOutilLayer.scale.setTo(0.7);
+          monOutilLayer.smoothed = false
+        }
+        monOutilLayer.frame = id
         let tool = potaTool.setTool(id)
       } else if (tileX > 0 && tileY > 0 &&
         tileX < POTAGER_COLS + 1 && tileY < POTAGER_ROWS + 1) {
