@@ -26,13 +26,12 @@ window.onload = function() {
   var potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
   var potaTool = new PotaTool(potaGen);
   potaKnow = new PotaKnow(potaGen, potaTool, (str) => {
-    //alert(str);
+    tractorSpeak()
+    console.log(str)
   }, (str) => {
     console.log('task changed : ' + str);
   });
   potaGen.register('phaser', null, potager_update)
-
-  potaKnow.nextKnowledge();
 
   // -----------------------------------------------------------------------
   // --------------------------------------------------- POTAUPDATE --------
@@ -155,6 +154,22 @@ window.onload = function() {
     setTile(fruitsMap, tileId, x + 1, y + 1, fruitsLayer)
   }
 
+  function tractorBreath() {
+    tractorBreathAnim.play(15, true);
+    speakCount = 0;
+  }
+
+  var speakCount = 0
+
+  function tractorSpeak() {
+    if (speakCount < 5) {
+      speakCount++;
+      tractorSpeakAnim.play();
+      tractorSpeakAnim.onComplete.add(tractorSpeak)
+    } else
+      tractorBreath()
+  }
+
   // -----------------------------------------------------------------------
   // --------------------------------------------------------- GAME --------
 
@@ -189,6 +204,8 @@ window.onload = function() {
     // SPRITE INFOPLANTE
     game.load.spritesheet('fruits', 'assets/fruits.png', CELL_SIZE, CELL_SIZE);
     // SPRITE EAU
+    game.load.spritesheet('tractorAnim', 'assets/tractorAnim.png', CELL_SIZE, CELL_SIZE);
+
   }
 
   // -----------------------------------------------------------------------
@@ -202,6 +219,7 @@ window.onload = function() {
   var eauMap;
   var plantesMap;
   var fruitsMap;
+  var tractorAnim;
 
   var outilsLayer;
   var potagerLayer;
@@ -256,6 +274,9 @@ window.onload = function() {
 
   var fruits_tomate = 0;
 
+  var tractorBreathAnim;
+  var tractorSpeackAnim;
+
   var marker;
   // -------------------
   function create() {
@@ -294,6 +315,10 @@ window.onload = function() {
     outilsMap.addTilesetImage('outils');
     outilsLayer = outilsMap.create(
       'outils', tCOLS, tROWS, CELL_SIZE, CELL_SIZE);
+
+    tractorAnim = game.add.sprite(CELL_SIZE * (POTAGER_COLS + 2.5), CELL_SIZE * POTAGER_ROWS, 'tractorAnim');
+    tractorBreathAnim = tractorAnim.animations.add('breath', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 15);
+    tractorSpeakAnim = tractorAnim.animations.add('speak', [14, 15, 16, 17], 10);
 
     // -- Setup tools
     for (let k in potaTool.tool)
@@ -338,6 +363,8 @@ window.onload = function() {
     marker = game.add.graphics();
     marker.lineStyle(2, 0x000000, 1);
     marker.drawRect(0, 0, 64, 64);
+
+    tractorBreath();
 
     game.input.addMoveCallback(updateMarker, this);
 
