@@ -2,8 +2,8 @@
 
 /* -- SAVEZ VOUS PLANTER...
     -- semer/planter
-    -- 
-    
+    --
+
 */
 
 TACHE_FINALE = 0
@@ -63,7 +63,7 @@ function getKnowledgeGraph(plantations)
                                 }
                                 else
                                     return 'Une graine j\'ai dit !'
-                                
+
                             }
                             else if(event.type=='dig')
                             {
@@ -93,7 +93,7 @@ function getKnowledgeGraph(plantations)
                                 }
                                 else
                                     return 'Une racine j\'ai dit !'
-                                
+
                             }
                         }
                     }
@@ -149,16 +149,18 @@ function getKnowledgeGraph(plantations)
                 // -----------
                 knowledges['maintenir_graine'] =
                 {
-                    name:'protéger les graines',
+                    name:'maintenir votre graines',
                     doneFunc:function(event)
                     {
+                        return true
                     }
                 }
                 knowledges['maintenir_patate'] =
                 {
-                    name:'cacher les racines du soleil',
+                    name:'maintenir une racine',
                     doneFunc:function(event)
                     {
+                        return true
                     }
                 }
             knowledges['recolter'] =
@@ -242,7 +244,7 @@ function getKnowledgeGraph(plantations)
                         return true
                     }
                 }
-    
+
     return knowledges
 }
 
@@ -252,24 +254,41 @@ class PotaKnow
     {
         this.potagen = potagen
         this.potatool = potatool
-        
+
         this.speekFunc = speekFunc
         this.taskFunc = taskFunc
-        
+
         this.knowledges = getKnowledgeGraph()
         for(var k in this.knowledges)
             this.knowledges[k]['id'] = k
-        
+
         this.potagen.register('knower',this,this.callback)
-        
+
         this.actTask = null
+
+        this.callbacks = []
     }
+
+    register(fun) {
+
+        this.callbacks.push(fun)
+
+    }
+
+    sendCallback(event) {
+
+        for(let cal of this.callbacks) {
+            cal(event);
+        }
+
+    }
+
     // -------------------------------------
     callback(event)
     {
         if(this.actTask==null)
             return
-            
+
         var ret = this.actTask.doneFunc(event)
         if(ret===true)
             this.nextKnowledge()
@@ -282,12 +301,10 @@ class PotaKnow
     // -------------------------------------
     say(str)
     {
-        console.log(str)
         this.speekFunc(str)
     }
     newTask(str)
     {
-        console.log('big task - '+str)
         this.taskFunc(str)
     }
     // -------------------------------------
@@ -320,6 +337,7 @@ class PotaKnow
     terminateTask(task)
     {
         task.done = true
+        this.sendCallback(task)
         this.say('Bravo vous savez '+task.name)
         if(task.hasOwnProperty('info'))
             this.say('Souvenez vous, '+task.info)
@@ -367,7 +385,7 @@ class PotaKnow
     threeLastNotDone(three)
     {
         three['parents'] = []
-        
+
         if(!three.hasOwnProperty('pred'))
             if(!three.done)
             {
@@ -375,7 +393,7 @@ class PotaKnow
             }
             else
                 return null
-        
+
         for(var k in three.pred)
         {
             var t = this.knowledges[three.pred[k]]
@@ -393,15 +411,15 @@ class PotaKnow
     // -------------------------------------
     getParents(task)
     {
-        
+
     }
     // -------------------------------------
     // -------------------------------------
     learn(task)
-    {        
+    {
         if(!task.hasOwnProperty('pred'))
             task['done'] = true
-        
+
         if(task.hasOwnProperty('done') && task.done)
         {
             let phrases = ['Allons ','Allez, voyons comment ','Apprenons à ']
@@ -409,7 +427,7 @@ class PotaKnow
             this.say('Bravo, vous avez compris comment '+task.name)
             return
         }
-        
+
         for(var k in task.pred)
         {
             var subTask = this.knowledges[task.pred[k]]
