@@ -368,6 +368,32 @@ window.onload = function() {
 
     game.input.addMoveCallback(updateMarker, this);
 
+
+    var testtip = new Phasetips(game, {
+      context: "Please enter your nickname to start game.",
+      font: "Josefin Sans",
+      fontSize: 24,
+      width: 180,
+      fontStroke: "#aae4ae",
+      fontFill: "#aae4ae",
+      backgroundColor: 0x0d8e9a,
+      strokeColor: 0x0d8e9a,
+      strokeWeight: 5,
+      roundedCornersRadius: 10,
+      x: 100,
+      y: 100,
+      disableInputEvents: true,
+      alwaysOn: true
+    });
+
+    testtip.showTooltip();
+
+    setTimeout(function() {
+
+      console.log(testtip);
+
+    }, 3000);
+
     gameLoaded();
   }
 
