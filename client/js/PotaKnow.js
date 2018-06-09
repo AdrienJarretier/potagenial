@@ -48,6 +48,7 @@ function getKnowledgeGraph(plantations)
                     knowledges['semer'] =
                     {
                         name:'semer des graines',
+                        tip:'Creuser un petit trou, et insérez une graine de tomate',
                         doneFunc:function(event)
                         {
                             if(event.type=='plant')
@@ -73,13 +74,14 @@ function getKnowledgeGraph(plantations)
                             else if(event.type=='bury')
                             {
                                 if(event.durt.level==MIDD_LEVEL)
-                                    return "Voila, c'est la bonne profondeure"
+                                    return "Voilà, c'est la bonne profondeur"
                             }
                         }
                     }
                     knowledges['planter'] =
                     {
                         name:'planter des racines',
+                        tip:'Creusez un gros trou et placer une patate dedans',
                         doneFunc:function(event)
                         {
                             if(event.type=='plant')
@@ -191,7 +193,7 @@ function getKnowledgeGraph(plantations)
                     doneFunc:function(event)
                     {
                         if(event.type=='plant')
-                            if(event.plant.name!='gravier')
+                            if(event.plant.name!='chemin')
                                 return 'Pas le bon outil peut-être ?'
                             return true
                     }
@@ -250,8 +252,9 @@ function getKnowledgeGraph(plantations)
 
 class PotaKnow
 {
-    constructor(potagen,potatool,speekFunc,taskFunc)
+    constructor(potagen,potatool,speekFunc,doneSpeackFunc,taskFunc)
     {
+        this.profil = []
         this.potagen = potagen
         this.potatool = potatool
 
@@ -262,11 +265,31 @@ class PotaKnow
         for(var k in this.knowledges)
             this.knowledges[k]['id'] = k
 
+        this.loadProfil()
+
         this.potagen.register('knower',this,this.callback)
 
         this.actTask = null
 
         this.callbacks = []
+
+        this.tipTimeout = 0;
+
+        this.doneSpeackFunc = doneSpeackFunc
+    }
+
+    loadProfil()
+    {
+        let loaded = localStorage.getItem('profil')
+        if(loaded != null && loaded != '')
+            this.profil = JSON.parse(loaded)
+        for(let t of this.profil)
+            this.knowledges[t].done = true
+    }
+
+    saveProfil()
+    {
+        //localStorage.setItem('profil',JSON.stringify(this.profil))
     }
 
     register(fun) {
@@ -281,6 +304,12 @@ class PotaKnow
             cal(event);
         }
 
+    }
+
+    randPhrase(phraseArray)
+    {
+        var randId = Math.floor(Math.random()*phraseArray.length);
+        return phraseArray[randId];
     }
 
     // -------------------------------------
@@ -317,17 +346,38 @@ class PotaKnow
         }
         var next = this.threeLastNotDone(this.knowledges['gerer_potager'])
         this.actTask = next
-        this.startTask(next)
+        /// terminée
+        this.doneSpeackFunc(function(){
+            this.startTask(next)
+        });
+
+        this.saveProfil()
     }
+
     //-------------
     startTask(task)
     {
+        console.log('START',task.name)
+        this.newTask(task.name)
         if(task == null)
         {
             this.say('Bravo vous avez terminé le jeu !')
             return
         }
-        this.say('Apprenons à '+task.name)
+        if(task.hasOwnProperty('tip'))
+        {
+            this.tipTimeout = setTimeout(()=>{
+                this.say('Astuce : '+task.tip)
+            },10000)
+        }
+        let phrase = this.randPhrase(
+            [
+            'Vous pouvez essayer de',
+            'Tentons de',
+            'Essayez de',
+            'Allons',
+            ])
+        this.say(phrase+' '+task.name)
         if(task.hasOwnProperty('story'))
         {
             this.say(task.story)
@@ -336,9 +386,19 @@ class PotaKnow
     //-------------
     terminateTask(task)
     {
+        clearTimeout(this.tipTimeout)
         task.done = true
+        this.profil.push(task.id)
         this.sendCallback(task)
-        this.say('Bravo vous savez '+task.name)
+        let phrase = this.randPhrase(
+            [
+            'Bravo vous savez',
+            'Vous comprenez maintenant comment',
+            'Vous savez maintenant comment',
+            'Félicitation vous avez appris à',
+            'Très bien, vous comprenez à présent comment',
+            ])
+        this.say(phrase+' '+task.name)
         if(task.hasOwnProperty('info'))
             this.say('Souvenez vous, '+task.info)
         var wasLastOfParent = this.taskWasLast(task.id)
@@ -350,7 +410,6 @@ class PotaKnow
         else if(isFirstOf!=null)
         {
             this.say("J'ai une idée, apprenons à "+isFirstOf.name)
-            this.newTask(isFirstOf.name)
         }
     }
     //-------------

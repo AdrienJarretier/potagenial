@@ -25,10 +25,35 @@ window.onload = function() {
   // -- models
   var potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
   var potaTool = new PotaTool(potaGen);
-  potaKnow = new PotaKnow(potaGen, potaTool, (str) => {
+
+  var queue = async.queue(function(str, func) {
+    talkerInfos.context = str
+    if (talker != null)
+      talker.destroy()
+    talker = new Phasetips(game, talkerInfos)
+    talker.showTooltip()
     tractorSpeak()
-    console.log(str)
-  }, (str) => {
+
+    setTimeout(func, str.length*60);
+
+  }, 1);
+
+  function speak(str) {
+    queue.push(str)
+  }
+
+  function doneSpeaking(func) {
+    if(queue.length()==0)
+        func.call(potaKnow)
+    else
+        queue.drain=function(){
+        func.call(potaKnow)
+        queue.drain = function(){}
+    }
+
+}
+
+  potaKnow = new PotaKnow(potaGen, potaTool, speak, doneSpeaking, (str) => {
     console.log('task changed : ' + str);
   });
   potaGen.register('phaser', null, potager_update)
@@ -277,6 +302,9 @@ window.onload = function() {
   var tractorBreathAnim;
   var tractorSpeackAnim;
 
+  var talker;
+  var talkerInfos;
+
   var marker;
   // -------------------
   function create() {
@@ -317,6 +345,8 @@ window.onload = function() {
       'outils', tCOLS, tROWS, CELL_SIZE, CELL_SIZE);
 
     tractorAnim = game.add.sprite(CELL_SIZE * (POTAGER_COLS + 2.5), CELL_SIZE * POTAGER_ROWS, 'tractorAnim');
+    tractorAnim.smoothed = false
+    tractorAnim.scale.setTo(1.5);
     tractorBreathAnim = tractorAnim.animations.add('breath', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 15);
     tractorSpeakAnim = tractorAnim.animations.add('speak', [14, 15, 16, 17], 10);
 
@@ -369,30 +399,21 @@ window.onload = function() {
     game.input.addMoveCallback(updateMarker, this);
 
 
-    var testtip = new Phasetips(game, {
-      context: "Please enter your nickname to start game.",
-      font: "Josefin Sans",
+    talkerInfos = {
+      context: "BANDE DE CONS",
+      font: "Comic sans ms",
       fontSize: 24,
       width: 180,
-      fontStroke: "#aae4ae",
-      fontFill: "#aae4ae",
-      backgroundColor: 0x0d8e9a,
-      strokeColor: 0x0d8e9a,
+      fontStroke: "#cec3a4",
+      fontFill: "#cec3a4",
+      backgroundColor: 0x8a3c32,
+      strokeColor: 0x8a3c32,
       strokeWeight: 5,
       roundedCornersRadius: 10,
-      x: 100,
-      y: 100,
+      targetObject: tractorAnim,
       disableInputEvents: true,
       alwaysOn: true
-    });
-
-    testtip.showTooltip();
-
-    setTimeout(function() {
-
-      console.log(testtip);
-
-    }, 3000);
+    }
 
     gameLoaded();
   }
