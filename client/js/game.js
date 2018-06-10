@@ -180,9 +180,9 @@ function loadGame() {
     }
 
     var doneSeedMap = {
-        carotte:5,
-        potato:1,
-        seed:3,
+      carotte: 5,
+      potato: 1,
+      seed: 3,
     }
 
     var planteMap = {
@@ -601,7 +601,7 @@ function loadGame() {
 
     // -- Setup tools
     for (let k in potaTool.tool)
-        outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
+      outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
 
     // -- Setup potager
     for (let i = 0; i < POTAGER_COLS + 2; ++i) {
@@ -662,14 +662,17 @@ function loadGame() {
     talkerInfos = {
       context: "BANDE DE CONS",
       font: "AlphaFridgeMagnets",
-      fontSize: 27,
+      fontSize: 25,
       width: 180,
       fontStroke: "#8a3c32",
+      fontStrokeThickness: 0,
       fontFill: "#cec3a4",
+      padding: 10,
       backgroundColor: 0x8a3c32,
       strokeColor: 0x8a3c32,
-      strokeWeight: 5,
+      strokeWeight: 0,
       roundedCornersRadius: 10,
+      position: 'top',
       targetObject: tractorAnim,
       disableInputEvents: true,
       alwaysOn: true
@@ -684,7 +687,7 @@ function loadGame() {
       fontFill: "#cec3a4",
       backgroundColor: 0x005511,
       strokeColor: 0x005511,
-      strokeWeight: 5,
+      strokeWeight: 0,
       roundedCornersRadius: 0,
       y: CELL_SIZE * (tROWS - 2),
       x: CELL_SIZE * (POTAGER_COLS + 1),
