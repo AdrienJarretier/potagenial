@@ -115,34 +115,41 @@ class PotaGen
     // -------------------------------------------
     newCycle()
     {
-        for(let k in this.seed.array)
+        var growDurtPlant = function(plant,durt,tim)
         {
-            let plant = this.seed.array[k]
-            let durt = this.durt.array[k]
-
-            let water = durt.water
-            let x = durt.x
-            let y = durt.y
-            if(plant.name != 'NO PLANT' && plant.grow>=0)
+            var tthis = this
+            setTimeout(function(){
+                let waterRatio = 1/plant.water
+                durt.water -= 1
+                tthis.sendEvent('water',plant.x,plant.y)
+                let adder = 1/plant.cycles
+                plant.grow += adder*waterRatio
+                tthis.sendEvent('grow',plant.x,plant.y)
+            },tim)
+        }
+        for(let x=0;x<this.width;++x)
+        {
+            for(let y=0;y<this.height;++y)
             {
-                if(Math.random()<.3)
-                    continue
-                let level = plant.level
-                let dLevel = durt.level
-                let needWater = plant.water
-                let above = level - dLevel
-                let needAbove = plant.above
-                let missingAbove = above - needAbove
-                if(missingAbove == 0 && plant.grow<1)
+                let plant = this.seed.xy_map[x][y]
+                let durt = this.durt.xy_map[x][y]
+
+                let water = durt.water
+                if(plant.name != 'NO PLANT' && plant.grow<1)
                 {
-                    if(water >= 1)
+                    let level = plant.level
+                    let dLevel = durt.level
+                    let needWater = plant.water
+                    let above = level - dLevel
+                    let needAbove = plant.above
+                    let missingAbove = above - needAbove
+                    if(missingAbove == 0)
                     {
-                        let waterRatio = 1/needWater
-                        durt.water -= 1
-                        this.sendEvent('water',x,y)
-                        let adder = 1/plant.cycles
-                        plant.grow += adder*waterRatio
-                        this.sendEvent('grow',x,y)
+                        if(water >= 1)
+                        {
+                            let tim = Math.random()*3*1000
+                            growDurtPlant.call(this,plant,durt,tim)
+                        }
                     }
                 }
             }
