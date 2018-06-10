@@ -534,8 +534,21 @@ function loadGame() {
   // -------------------
   function create() {
 
-    backSound = game.add.audio('background', 0.1, true)
+    function musicVolume(musicSliderValue) {
+
+      return musicSliderValue / 100 * 0.15;
+
+    }
+
+    backSound = game.add.audio('background', musicVolume($('#musicVolume input').val()), true)
     backSound.play()
+
+    $('#musicVolume input').on('input', function() {
+
+      backSound.volume = musicVolume($(this).val());
+
+    });
+
 
     oldTractorSpeacker = game.add.audioSprite('old_tractor');
     oldTractorSpeacker.allowMultiple = true;
