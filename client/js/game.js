@@ -399,7 +399,7 @@ window.onload = function() {
     game.load.audio('taskDone','assets/sound/taskDone.mp3')
 
     // IMPORT OLD MAN SOUND
-    game.load.audioSprite('old_tractor', 'assets/sound/old_tractor.mp3', 'assets/sound/old_tractor.json');
+    game.load.audioSprite('old_tractor', 'assets/sound/oldMan/old_tractor.mp3', 'assets/sound/oldMan/old_tractor.json');
 
     game.load.audio('background','assets/sound/background.wav')
 
