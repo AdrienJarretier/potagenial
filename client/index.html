@@ -3,10 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Potager</title>
+  <title>Pota genial</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser-ce@2.10.3/build/phaser.min.js"></script>
   <style>
-
   #game {
     cursor: none;
   }
@@ -28,21 +27,19 @@
 
   gameLoaded = function() {
 
-    function launchSandbox()
-    {
-        setInterval(function(){
-          potaGen.newCycle.call(potaGen)
-        },2000)
+    function launchSandbox() {
+      setInterval(function() {
+        potaGen.newCycle.call(potaGen)
+      }, 2000)
     }
 
     let nextTask = potaKnow.nextKnowledge();
-    if(nextTask==null)
+    if (nextTask == null)
       launchSandbox()
     let actTasks = ['gerer_potager'];
 
     potaKnow.register(function(task) {
-      if(task.hasOwnProperty('last'))
-      {
+      if (task.hasOwnProperty('last')) {
         launchSandbox()
       }
       drawPred(actTasks)
