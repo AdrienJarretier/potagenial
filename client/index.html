@@ -44,7 +44,7 @@
     let actTasks = ['gerer_potager'];
 
     potaKnow.register(function(task) {
-      if (task.hasOwnProperty('last')) {
+      if (task != null && task.hasOwnProperty('last')) {
         launchSandbox()
       }
       drawPred(actTasks)
@@ -54,6 +54,8 @@
     let graph = potaKnow.knowledges;
 
     function evaluate(taskname) {
+        console.log('evaluate');
+        console.log(potaKnow.knowledges);
       var task = potaKnow.knowledges[taskname]
       if (task.hasOwnProperty('done') && task.done === true)
         return 100

@@ -306,9 +306,9 @@ function getKnowledgeGraph(plantations)
                                     let verti = cordeau && up && down
 
                                     if((verti && left) || (verti && right))
-                                        return "Attention Picasso, ne partez pas dans tout les sens"
+                                        return "Attention Picasso, ne partez pas dans tous les sens"
                                     if((horiz && up) || (horiz && down))
-                                        return "Attention Picasso, ne partez pas dans tout les sens"
+                                        return "Attention Picasso, ne partez pas dans tous les sens"
                                     if(verti || horiz)
                                         return true
                                 }
@@ -379,12 +379,16 @@ class PotaKnow
 
     resetModel()
     {
+        this.profil = []
         localStorage.removeItem('profil')
         for(let t in this.knowledges)
             this.knowledges[t].done = false
+
+        console.log(this.knowledges);
         this.actTask = null
         this.taskInTesting = false
         clearTimeout(this.tipTimeout)
+        this.sendCallback(null)
     }
 
     loadProfil()
@@ -398,6 +402,7 @@ class PotaKnow
 
     saveProfil()
     {
+        console.log("saveing")
         localStorage.setItem('profil',JSON.stringify(this.profil))
     }
 

@@ -108,6 +108,8 @@ function loadGame() {
   updateCycle = function() { potaGen.newCycle.call(potaGen) }
 
   potaKnow.register(function(task) {
+    if(task == null)
+      return
     if (task.hasOwnProperty('last'))
       game.sound.play('win', 0.3)
     else
@@ -643,7 +645,9 @@ function loadGame() {
           potaKnow.resetModel()
           drawPotager()
           potaKnow.nextKnowledge()
-          //queue.kill()
+
+
+
         }
       });
 
