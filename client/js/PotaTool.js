@@ -28,13 +28,12 @@ class PotaTool
             {
                 name:'tomato',
                 seed:'seed',
-                above:2,
-                plante:['grow_0','grow_1','grow_2'],
-                fruit:'tomate',
-                grown:
-                {
-                    seed:'potato_1,'
-                }
+                name:'tomato',
+                fruit:'tomato',
+                above:1,
+                water:1,
+                cycles:3,
+                plant:'plante'
             }
         })
         this.tool.push(
@@ -43,49 +42,50 @@ class PotaTool
             plant:
             {
                 seed:'potato',
-                plante:'grow_0',
+                seedDone:'potatos',
                 name:'potato',
-                grown:
-                {
-                    plante:'feuilles',
-                    seed:'potato_1,'
-                }
+                above:3,
+                water:2,
+                cycles:4,
+                plant:'feuille'
             }
         })
         this.tool.push(
         {
-            name:'cordeau',
+            name:'carotte',
             plant:
             {
-                seed:'cordeauCorde',
-                type:'stay',
-                name:'cordeau'
+                seed:'carotte',
+                seedDone:'carottes',
+                name:'carotte',
+                above:3,
+                water:2,
+                cycles:4,
+                plant:'tige'
             }
         })
         this.tool.push(
         {
-            name:'gravier',
-            plant:
-            {
-                seed:'gravier',
-                type:'stay',
-                name:'gravier'
-            }
+            name:'cordeau'
         })
         this.curTool = null
     }
-    
+
     setTool(id)
     {
         this.curTool = this.tool[id]
         return {type:'tool',tool:this.curTool}
     }
-    
+
     use(x,y,option)
     {
         if(this.curTool == null)
             return {type:'use',result:'fail'}
         var tool = this.curTool
+        if(tool.name == 'cordeau')
+        {
+            return this.potagen.setCordeau(x,y,option==1)
+        }
         if(tool.hasOwnProperty('plant'))
             return this.potagen.plant(x,y,tool.plant)
         else if(tool.hasOwnProperty('options'))
