@@ -365,7 +365,7 @@ class PotaKnow
 
     saveProfil()
     {
-        //localStorage.setItem('profil',JSON.stringify(this.profil))
+        localStorage.setItem('profil',JSON.stringify(this.profil))
     }
 
     register(fun) {
@@ -435,6 +435,7 @@ class PotaKnow
         });
 
         this.saveProfil()
+        return next
     }
 
     //-------------

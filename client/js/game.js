@@ -1,5 +1,6 @@
 "use strict";
 var potaKnow;
+var potaGen;
 
 function gameLoaded() {}; // function called when the game is created
 function updateCycle() {};
@@ -26,7 +27,7 @@ window.onload = function() {
   const height = (tROWS) * CELL_SIZE;
 
   // -- models
-  var potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
+  potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
   var potaTool = new PotaTool(potaGen);
 
   var queue = async.queue(function(str, func) {
@@ -81,7 +82,7 @@ window.onload = function() {
 
   potaKnow.register(function(task){
     if(task.hasOwnProperty('last'))
-        taskDoneSpeacker.play()
+        game.sound.play('win',0.3)
     else
         taskDoneSpeacker.play()
   });
@@ -128,7 +129,7 @@ window.onload = function() {
         if(water==0)
             setEau(-1,x,y)
         else
-            setEau(water,x,y)
+            setEau(water-1,x,y)
     }
     /*
     else if(type == 'water')
@@ -413,6 +414,7 @@ window.onload = function() {
     game.load.audio('water','assets/sound/water.mp3')
     game.load.audio('pickedPlant','assets/sound/pickedPlant.mp3')
     game.load.audio('taskDone','assets/sound/taskDone.mp3')
+    game.load.audio('win','assets/sound/win.mp3')
 
     // IMPORT OLD MAN SOUND
     game.load.audioSprite('old_tractor', 'assets/sound/oldMan/old_tractor.mp3', 'assets/sound/oldMan/old_tractor.json');
@@ -611,6 +613,24 @@ window.onload = function() {
       for (let j = 0; j < tROWS; ++j) {
         potagerMap.putTile(fences_herbe, i, j, potagerLayer)
       }
+    }
+
+    for(let x=0;x<POTAGER_COLS;++x)
+    {
+        for(let y=0;y<POTAGER_ROWS;++y)
+        {
+            let seed = potaGen.seed.xy_map[x][y]
+            let durt = potaGen.durt.xy_map[x][y]
+            let cordeau = potaGen.cordeau.xy_map[x][y]
+
+            createHoles(potaGen, x, y, [])
+            drawPlant(seed,durt,x,y)
+            createCordeau(potaGen, x, y, [])
+            if(durt.water==0)
+                setEau(-1,x,y)
+            else
+                setEau(durt.water-1,x,y)
+        }
     }
 
     tractorBreath();
