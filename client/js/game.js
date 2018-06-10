@@ -1,5 +1,6 @@
 "use strict";
 var potaKnow;
+var potaGen;
 
 function gameLoaded() {}; // function called when the game is created
 function updateCycle() {};
@@ -26,7 +27,7 @@ window.onload = function() {
   const height = (tROWS) * CELL_SIZE;
 
   // -- models
-  var potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
+  potaGen = new PotaGen(POTAGER_COLS, POTAGER_ROWS);
   var potaTool = new PotaTool(potaGen);
 
   var queue = async.queue(function(str, func) {
@@ -79,8 +80,11 @@ window.onload = function() {
 
   updateCycle = function(){potaGen.newCycle.call(potaGen)}
 
-  potaKnow.register(function(){
-    taskDoneSpeacker.play()
+  potaKnow.register(function(task){
+    if(task.hasOwnProperty('last'))
+        game.sound.play('win',0.3)
+    else
+        taskDoneSpeacker.play()
   });
 
   // -----------------------------------------------------------------------
@@ -120,6 +124,13 @@ window.onload = function() {
     }
     else if(type=='cordeau')
         createCordeau(potaGen, x, y, [])
+    else if(type=='water')
+    {
+        if(water==0)
+            setEau(-1,x,y)
+        else
+            setEau(water-1,x,y)
+    }
     /*
     else if(type == 'water')
     {
@@ -327,6 +338,10 @@ window.onload = function() {
     setTile(racinesMap, tileId, x + 1, y + 1, racinesLayer)
   }
 
+  function setEau(tileId, x, y) {
+    setTile(eauMap, tileId, x + 1, y + 1, eauLayer)
+  }
+
   function setPlante(tileId, x, y) {
     setTile(plantesMap, tileId, x + 1, y + 1, plantesLayer)
   }
@@ -388,6 +403,8 @@ window.onload = function() {
     // SPRITE INFOPLANTE
     game.load.spritesheet('fruits', 'assets/fruits.png', CELL_SIZE, CELL_SIZE);
     // SPRITE EAU
+    game.load.spritesheet('water', 'assets/water.png', CELL_SIZE, CELL_SIZE);
+
     game.load.spritesheet('tractorAnim', 'assets/tractorAnim.png', CELL_SIZE, CELL_SIZE);
 
     game.load.spritesheet('cordeau', 'assets/cordeau.png', CELL_SIZE, CELL_SIZE);
@@ -397,6 +414,7 @@ window.onload = function() {
     game.load.audio('water','assets/sound/water.mp3')
     game.load.audio('pickedPlant','assets/sound/pickedPlant.mp3')
     game.load.audio('taskDone','assets/sound/taskDone.mp3')
+    game.load.audio('win','assets/sound/win.mp3')
 
     // IMPORT OLD MAN SOUND
     game.load.audioSprite('old_tractor', 'assets/sound/oldMan/old_tractor.mp3', 'assets/sound/oldMan/old_tractor.json');
@@ -426,6 +444,7 @@ window.onload = function() {
   var tranchesLayer;
   var trousLayer;
   var racinesLayer;
+  var eauLayer;
   var cordeauLayer;
   var plantesLayer;
   var fruitsLayer;
@@ -520,6 +539,11 @@ window.onload = function() {
     racinesLayer = racinesMap.create(
       'racines', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
 
+    eauMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+    eauMap.addTilesetImage('water');
+    eauLayer = eauMap.create(
+      'water', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
+
     cordeauMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
     cordeauMap.addTilesetImage('cordeau');
     cordeauLayer = cordeauMap.create(
@@ -589,6 +613,24 @@ window.onload = function() {
       for (let j = 0; j < tROWS; ++j) {
         potagerMap.putTile(fences_herbe, i, j, potagerLayer)
       }
+    }
+
+    for(let x=0;x<POTAGER_COLS;++x)
+    {
+        for(let y=0;y<POTAGER_ROWS;++y)
+        {
+            let seed = potaGen.seed.xy_map[x][y]
+            let durt = potaGen.durt.xy_map[x][y]
+            let cordeau = potaGen.cordeau.xy_map[x][y]
+
+            createHoles(potaGen, x, y, [])
+            drawPlant(seed,durt,x,y)
+            createCordeau(potaGen, x, y, [])
+            if(durt.water==0)
+                setEau(-1,x,y)
+            else
+                setEau(durt.water-1,x,y)
+        }
     }
 
     tractorBreath();

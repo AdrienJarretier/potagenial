@@ -32,10 +32,24 @@
   "use strict";
 
   gameLoaded = function() {
-    potaKnow.nextKnowledge();
+
+    function launchSandbox()
+    {
+        setInterval(function(){
+          potaGen.newCycle.call(potaGen)
+        },2000)
+    }
+
+    let nextTask = potaKnow.nextKnowledge();
+    if(nextTask==null)
+      launchSandbox()
     let actTasks = ['gerer_potager'];
 
     potaKnow.register(function(task) {
+      if(task.hasOwnProperty('last'))
+      {
+        launchSandbox()
+      }
       drawPred(actTasks)
     });
 

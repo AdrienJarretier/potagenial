@@ -28,6 +28,23 @@ class PotaGen
         })
     }
     // -------------------------------------------
+    loadPotager()
+    {
+        var ret = localStorage.getItem('potager')
+        if(ret!=null && ret!='')
+        {
+            ret = JSON.parse(ret)
+            return ret
+        }
+        return null
+    }
+    // -------------------------------------------
+    savePotager()
+    {
+        let obj = {durt:this.durt,seed:this.seed,cordeau:this.cordeau}
+        localStorage.setItem('potager',JSON.stringify(obj))
+    }
+    // -------------------------------------------
     register(id,obj,func)
     {
         this.callbacks[id] = {obj:obj,func:func}
@@ -35,6 +52,7 @@ class PotaGen
     // -------------------------------------------
     sendEvent(eventType,x,y,adder)
     {
+        this.savePotager()
         adder = adder==undefined?{}:adder;
         adder['type'] = eventType
         adder['potagen'] = this
@@ -56,6 +74,8 @@ class PotaGen
         this.height = h
         this.initVars()
 
+        let loaded = this.loadPotager()
+
         for(let i=0;i<w;++i)
         {
             this.durt.xy_map[i] = {}
@@ -63,20 +83,29 @@ class PotaGen
             this.cordeau.xy_map[i] = {}
             for(let j=0;j<h;++j)
             {
-                var d =
+                if(loaded!=null)
                 {
-                    x:i,
-                    y:j,
-                    level:ZERO_LEVEL,
-                    water:WATER_DRY,
+                    this.durt.xy_map[i][j] = loaded.durt.xy_map[i][j]
+                    this.seed.xy_map[i][j] = loaded.seed.xy_map[i][j]
+                    this.cordeau.xy_map[i][j] = loaded.cordeau.xy_map[i][j]
                 }
-                var p =
+                else
                 {
-                    name:'NO PLANT'
+                    var d =
+                    {
+                        x:i,
+                        y:j,
+                        level:ZERO_LEVEL,
+                        water:WATER_DRY,
+                    }
+                    var p =
+                    {
+                        name:'NO PLANT'
+                    }
+                    this.durt.xy_map[i][j] = d
+                    this.seed.xy_map[i][j] = p
+                    this.cordeau.xy_map[i][j] = null
                 }
-                this.durt.xy_map[i][j] = d
-                this.seed.xy_map[i][j] = p
-                this.cordeau.xy_map[i][j] = null
                 this.durt.array.push(this.durt.xy_map[i][j])
                 this.seed.array.push(this.seed.xy_map[i][j])
                 this.cordeau.array.push(this.cordeau.xy_map[i][j])
@@ -96,6 +125,8 @@ class PotaGen
             let y = durt.y
             if(plant.name != 'NO PLANT' && plant.grow>=0)
             {
+                if(Math.random()<.3)
+                    continue
                 let level = plant.level
                 let dLevel = durt.level
                 let needWater = plant.water
@@ -104,11 +135,13 @@ class PotaGen
                 let missingAbove = above - needAbove
                 if(missingAbove == 0 && plant.grow<1)
                 {
-                    console.log(water,needWater)
-                    if(water >= needWater)
+                    if(water >= 1)
                     {
+                        let waterRatio = 1/needWater
+                        durt.water -= 1
+                        this.sendEvent('water',x,y)
                         let adder = 1/plant.cycles
-                        plant.grow += adder
+                        plant.grow += adder*waterRatio
                         this.sendEvent('grow',x,y)
                     }
                 }
@@ -171,6 +204,11 @@ class PotaGen
         }
         this.durt.xy_map[x][y].level = level
         this.sendEvent(amount>0?'dig':'bury',x,y)
+        if(this.durt.xy_map[x][y].water>0)
+        {
+            this.durt.xy_map[x][y].water = 0
+            this.sendEvent('water',x,y)
+        }
         return ret
     }
     // -------------------------------------------
