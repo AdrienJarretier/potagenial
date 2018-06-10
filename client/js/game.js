@@ -597,10 +597,10 @@ window.onload = function() {
 
     talkerInfos = {
       context: "BANDE DE CONS",
-      font: "Comic sans ms",
-      fontSize: 24,
+      font: "VASCON",
+      fontSize: 27,
       width: 180,
-      fontStroke: "#cec3a4",
+      fontStroke: "#8a3c32",
       fontFill: "#cec3a4",
       backgroundColor: 0x8a3c32,
       strokeColor: 0x8a3c32,
@@ -613,10 +613,10 @@ window.onload = function() {
 
     currentTaskInfos = {
       context: "BANDE DE CONS",
-      font: "Comic sans ms",
-      fontSize: 15,
+      font: "VASCON",
+      fontSize: 18,
       width: 180,
-      fontStroke: "#cec3a4",
+      fontStroke: "#005511",
       fontFill: "#cec3a4",
       backgroundColor: 0x005511,
       strokeColor: 0x005511,
