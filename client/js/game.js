@@ -444,6 +444,7 @@ function loadGame() {
 
     game.load.audio('background', 'assets/sound/background.wav')
 
+    game.load.image('resetButton', 'assets/buttons/Button12Reset.png');
 
   }
 
@@ -549,7 +550,6 @@ function loadGame() {
 
     });
 
-
     oldTractorSpeacker = game.add.audioSprite('old_tractor');
     oldTractorSpeacker.allowMultiple = true;
 
@@ -611,6 +611,21 @@ function loadGame() {
     marker = game.add.graphics();
     marker.lineStyle(2, 0x000000, 1);
     marker.drawRect(0, 0, 64, 64);
+
+
+    const RESET_BUTTON_SCALE = 0.5;
+    const RESET_BUTTON_Y_OFFSET = (- 80 * RESET_BUTTON_SCALE)/2;
+
+    console.log(RESET_BUTTON_Y_OFFSET);
+
+    let resetButton = game.add.button(game.world.width - 300 * RESET_BUTTON_SCALE + RESET_BUTTON_Y_OFFSET, game.world.height - 80 * RESET_BUTTON_SCALE + RESET_BUTTON_Y_OFFSET, 'resetButton',
+      function() {
+
+        console.log('click');
+
+      });
+
+    resetButton.setScaleMinMax(RESET_BUTTON_SCALE, RESET_BUTTON_SCALE, RESET_BUTTON_SCALE, RESET_BUTTON_SCALE);
 
     // -- Setup tools
     for (let k in potaTool.tool)
