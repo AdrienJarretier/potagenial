@@ -29,7 +29,7 @@ class PotaTool
                 seed:'seed',
                 name:'tomato',
                 fruit:'tomato',
-                above:2,
+                above:1,
                 water:1,
                 cycles:3,
                 plant:'plante'
@@ -61,13 +61,7 @@ class PotaTool
         })
         this.tool.push(
         {
-            name:'cordeau',
-            plant:
-            {
-                seed:'cordeau',
-                type:'stay',
-                name:'cordeau'
-            }
+            name:'cordeau'
         })
         this.curTool = null
     }
@@ -77,12 +71,16 @@ class PotaTool
         this.curTool = this.tool[id]
         return {type:'tool',tool:this.curTool}
     }
-    
+
     use(x,y,option)
     {
         if(this.curTool == null)
             return {type:'use',result:'fail'}
         var tool = this.curTool
+        if(tool.name == 'cordeau')
+        {
+            return this.potagen.setCordeau(x,y,option==1)
+        }
         if(tool.hasOwnProperty('plant'))
             return this.potagen.plant(x,y,tool.plant)
         else if(tool.hasOwnProperty('options'))

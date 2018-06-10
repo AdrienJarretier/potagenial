@@ -3,6 +3,7 @@ var potaKnow;
 
 function gameLoaded() {}; // function called when the game is created
 function updateCycle() {};
+var backSound;
 
 window.onload = function() {
 
@@ -36,6 +37,9 @@ window.onload = function() {
       talker.destroy()
     talker = new Phasetips(game, talkerInfos)
     talker.showTooltip()
+    let lRate = Math.min(Math.floor((str.length/110)*9),8)+1
+    console.log('0'+lRate+'-Old man speaking about life')
+    oldTractorSpeacker.play('0'+lRate+'-Old man speaking about life');
     tractorSpeak()
 
     setTimeout(func, str.length * 60);
@@ -44,6 +48,8 @@ window.onload = function() {
 
   var lastStr = '';
   function speak(str) {
+    if(queue.length()==0)
+        lastStr = ''
     if(lastStr != str)
         queue.push(str)
     lastStr = str
@@ -73,9 +79,21 @@ window.onload = function() {
 
   updateCycle = function(){potaGen.newCycle.call(potaGen)}
 
+  potaKnow.register(function(){
+    taskDoneSpeacker.play()
+  });
+
   // -----------------------------------------------------------------------
   // --------------------------------------------------- POTAUPDATE --------
   function potager_update(event) {
+
+    let audioMap = {
+        'dig':'dig',
+        'bury':'bury',
+        'water':'water',
+        'plant':'pickedPlant',
+        'pickedPlant':'pickedPlant',
+    }
 
     console.log(event)
     let x = event.x;
@@ -84,6 +102,11 @@ window.onload = function() {
     let durt = event.durt;
     let plant = event.plant;
     let water = durt.water
+
+    if(audioMap.hasOwnProperty(type))
+    {
+        game.sound.play(audioMap[type])
+    }
 
     if (type == 'dig' || type == 'bury') {
       let ret = createHoles(potaGen, x, y, [])
@@ -95,6 +118,8 @@ window.onload = function() {
     else if (type == 'plant' || type=='grow' || type=='pickedPlant') {
         drawPlant(plant,durt,x,y)
     }
+    else if(type=='cordeau')
+        createCordeau(potaGen, x, y, [])
     /*
     else if(type == 'water')
     {
@@ -224,6 +249,64 @@ window.onload = function() {
     return true;
   }
 
+  function createCordeau(potaGen, x, y, forget) {
+    if (x < 0 || y < 0 || x > POTAGER_COLS - 1 || y > POTAGER_ROWS - 1)
+      return false;
+
+    let myIndex = x + y * POTAGER_COLS;
+
+    if (forget.indexOf(myIndex) > -1)
+      return potaGen.cordeau.xy_map[x][y] == 'cordeau';
+
+    setCordeau(-1, x, y)
+
+    forget.push(myIndex);
+    let left = createCordeau(potaGen, x - 1, y, forget);
+    let right = createCordeau(potaGen, x + 1, y, forget);
+    let up = createCordeau(potaGen, x, y - 1, forget);
+    let down = createCordeau(potaGen, x, y + 1, forget);
+
+    if (potaGen.cordeau.xy_map[x][y] != 'cordeau') {
+      setCordeau(-1, x, y)
+      return false
+    }
+
+    if (!(left || right || up || down)) {
+      setCordeau(tranche_x, x, y)
+    } else if (left && right && up && down) {
+      setCordeau(tranche_x, x, y)
+    } else if (left && right && up) {
+      setCordeau(tranche_t_up, x, y)
+    } else if (left && right && down) {
+      setCordeau(tranche_t_down, x, y)
+    } else if (left && up && down) {
+      setCordeau(tranche_t_left, x, y)
+    } else if (right && up && down) {
+      setCordeau(tranche_t_right, x, y)
+    } else if (down && right) {
+      setCordeau(tranche_l_down, x, y)
+    } else if (left && down) {
+      setCordeau(tranche_l_left, x, y)
+    } else if (up && right) {
+      setCordeau(tranche_l_right, x, y)
+    } else if (up && left) {
+      setCordeau(tranche_l_up, x, y)
+    } else if (up && down) {
+      setCordeau(tranche_h_up, x, y)
+    } else if (left && right) {
+      setCordeau(tranche_h_left, x, y)
+    } else if (left) {
+      setCordeau(tranche_left, x, y)
+    } else if (right) {
+      setCordeau(tranche_right, x, y)
+    } else if (up) {
+      setCordeau(tranche_up, x, y)
+    } else if (down) {
+      setCordeau(tranche_down, x, y)
+    }
+    return true;
+  }
+
   function setTile(map, tileId, x, y, layer) {
     if (tileId == -1) {
       map.removeTile(x, y, layer)
@@ -248,6 +331,10 @@ window.onload = function() {
     setTile(plantesMap, tileId, x + 1, y + 1, plantesLayer)
   }
 
+  function setCordeau(tileId, x, y) {
+    setTile(cordeauMap, tileId, x + 1, y + 1, cordeauLayer)
+  }
+
   function setFruit(tileId, x, y) {
     setTile(fruitsMap, tileId, x + 1, y + 1, fruitsLayer)
   }
@@ -258,7 +345,6 @@ window.onload = function() {
   }
 
   var speakCount = 0
-
   function tractorSpeak() {
     if (speakCount < 5) {
       speakCount++;
@@ -304,6 +390,20 @@ window.onload = function() {
     // SPRITE EAU
     game.load.spritesheet('tractorAnim', 'assets/tractorAnim.png', CELL_SIZE, CELL_SIZE);
 
+    game.load.spritesheet('cordeau', 'assets/cordeau.png', CELL_SIZE, CELL_SIZE);
+
+    game.load.audio('dig','assets/sound/dig.mp3')
+    game.load.audio('bury','assets/sound/bury.mp3')
+    game.load.audio('water','assets/sound/water.mp3')
+    game.load.audio('pickedPlant','assets/sound/pickedPlant.mp3')
+    game.load.audio('taskDone','assets/sound/taskDone.mp3')
+
+    // IMPORT OLD MAN SOUND
+    game.load.audioSprite('old_tractor', 'assets/sound/old_tractor.mp3', 'assets/sound/old_tractor.json');
+
+    game.load.audio('background','assets/sound/background.wav')
+
+
   }
 
   // -----------------------------------------------------------------------
@@ -315,6 +415,7 @@ window.onload = function() {
   var trousMap;
   var racinesMap;
   var eauMap;
+  var cordeauMap;
   var plantesMap;
   var fruitsMap;
   var tractorAnim;
@@ -325,6 +426,7 @@ window.onload = function() {
   var tranchesLayer;
   var trousLayer;
   var racinesLayer;
+  var cordeauLayer;
   var plantesLayer;
   var fruitsLayer;
 
@@ -381,9 +483,22 @@ window.onload = function() {
   var currentTask;
   var currentTaskInfos;
 
+  var oldTractorSpeacker;
+  var taskDoneSpeacker;
+
   var marker;
   // -------------------
   function create() {
+
+    backSound = game.add.audio('background',0.1,true)
+    backSound.play()
+
+    oldTractorSpeacker = game.add.audioSprite('old_tractor');
+    oldTractorSpeacker.allowMultiple = true;
+
+    taskDoneSpeacker = game.add.sound('taskDone');
+    taskDoneSpeacker.allowMultiple = false;
+    taskDoneSpeacker.volume = 0.3;
     // -- MAPS
     potagerMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
     potagerMap.addTilesetImage('fences');
@@ -404,6 +519,11 @@ window.onload = function() {
     racinesMap.addTilesetImage('racines');
     racinesLayer = racinesMap.create(
       'racines', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
+
+    cordeauMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+    cordeauMap.addTilesetImage('cordeau');
+    cordeauLayer = cordeauMap.create(
+      'cordeau', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
 
     plantesMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
     plantesMap.addTilesetImage('plantes');
@@ -431,8 +551,9 @@ window.onload = function() {
     marker.drawRect(0, 0, 64, 64);
 
     // -- Setup tools
-    for (let k in potaTool.tool)
-      outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
+    for (let k in potaTool.tool) 
+      if(parseInt(k)!=4)
+        outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
 
     // -- Setup potager
     for (let i = 0; i < POTAGER_COLS + 2; ++i) {
