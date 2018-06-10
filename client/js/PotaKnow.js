@@ -37,7 +37,7 @@ function getKnowledgeGraph(plantations)
             {
                 name:'planter dans votre potager',
                 pred:['semer_planter','recouvrir'],
-                info:'La graine se seme, la racine se plante. On seme prêt du sol, on plante loin du soleil'
+                info:'La graine se sème, la racine se plante. On sème prêt du sol, on plante loin du soleil'
             }
                 // -----------
                 knowledges['semer_planter'] =
@@ -52,7 +52,7 @@ function getKnowledgeGraph(plantations)
                         tip:'Creuser un petit trou, et insérez une graine de tomate',
                         init:function(potaGen,done)
                         {
-                            this.say('Bienvenu à vous dans potaGen, votre jeu de gestion et d\'apprentissage')
+                            this.say('Bienvenue à vous dans Pota genial, votre jeu de gestion et d\'apprentissage')
                             done()
                         },
                         doneFunc:function(event)
@@ -87,7 +87,7 @@ function getKnowledgeGraph(plantations)
                     knowledges['planter'] =
                     {
                         name:'planter des racines',
-                        tip:'Creusez un gros trou et placer une patate dedans',
+                        tip:'Creusez un gros trou et placez une patate ou une carotte dedans',
                         doneFunc:function(event)
                         {
                             if(event.type=='plant')
@@ -120,13 +120,13 @@ function getKnowledgeGraph(plantations)
                         doneFunc:function(event)
                         {
                             if(event.type!='bury')
-                                return 'Que fais-tu ?'
+                                return 'Que faites-vous ?'
                             if(event.plant.name=='NO PLANT')
-                                return "Ah, il n'y a rien à enterer ici..."
+                                return "Ah, il n'y a rien à enterrer ici..."
                             if(event.plant.seed!='seed')
-                                return "Attention ! Pour l'instant On s'occupe des graines !"
+                                return "Attention ! Pour l'instant on s'occupe des graines !"
                             if(event.plant.level!=MIDD_LEVEL)
-                                return 'Hum, cette graine a été mal plantée...'
+                                return 'Hum, cette graine a mal été plantée...'
                             if(event.durt.level<ZERO_LEVEL)
                                 return 'Pas si haut, la graine a besoin de soleil !'
                             return true;
@@ -139,13 +139,13 @@ function getKnowledgeGraph(plantations)
                         doneFunc:function(event)
                         {
                             if(event.type!='bury')
-                                'Que fais-tu ?'
+                                return 'Que faites-vous ?'
                             if(event.plant.name=='NO PLANT')
-                                return "Ah, il n'y a rien à enterer ici..."
+                                return "Ah, il n'y a rien à enterrer ici..."
                             if(event.plant.seed!=event.plant.name)
                                 return "Cette fois on s'occupe des racines..."
                             if(event.plant.level!=DEEP_LEVEL)
-                                return 'Hum, cette racine a été mal plantée...'
+                                return 'Hum, cette racine a mal été plantée...'
                             if(event.durt.level>PILE_LEVEL)
                                 return 'Plus haut !'
                             return true;
@@ -162,7 +162,7 @@ function getKnowledgeGraph(plantations)
                 knowledges['maintenir_graine'] =
                 {
                     name:'maintenir vos graines',
-                    tip:'Arrosez votre graine suffisement sans en mettre trop',
+                    tip:'Arrosez votre graine suffisamment sans en mettre trop',
                     doneFunc:function(event)
                     {
                         if(event.type != 'water')
@@ -177,7 +177,7 @@ function getKnowledgeGraph(plantations)
                 knowledges['maintenir_patate'] =
                 {
                     name:'maintenir une racine',
-                    tip:'Donnez suffisemment à boire à votre patate',
+                    tip:'Donnez suffisamment à boire à votre racine',
                     doneFunc:function(event)
                     {
                         if(event.type != 'water')
@@ -197,7 +197,7 @@ function getKnowledgeGraph(plantations)
                 tip:'Creusez assez profond pour récupérer votre plantation',
                 init:function(potaGen,done)
                 {
-                    this.say('Regarder vos plantations pousser !!')
+                    this.say('Regardez vos plantations pousser !!')
                     this.say("N'oubliez pas d'arroser régulièrement !")
                     var potagen = potaGen
                     var int = setInterval(function(){
@@ -218,7 +218,7 @@ function getKnowledgeGraph(plantations)
                         return true
                     if(event.plant.name == 'NO PLANT')
                         return "Pas de plante ici !"
-                    return "Essaie encore"
+                    return "Essayez encore"
                 }
                 /// TODO
             }
@@ -261,14 +261,14 @@ function getKnowledgeGraph(plantations)
             {
                 name:'organiser les plantations',
                 pred:['preparer_terrain','planter_preparation'],
-                info:'Utilisez votre cordeau pour vous reperer dans votre potager',
+                info:'Utilisez votre cordeau pour vous repérer dans votre potager',
             }
                 // -----------
                 knowledges['preparer_terrain'] =
                 {
                     name:'préparer la plantation',
                     pred:['placer_cordeau','cordeau_optimise'],
-                    info:"Le cordeau vous sert à délimiter votre éspace, utilisez le à bon essient"
+                    info:"Le cordeau vous sert à délimiter votre espace, utilisez le à bon escient"
                 }
                     // -----------
                     knowledges['placer_cordeau'] =
@@ -278,7 +278,7 @@ function getKnowledgeGraph(plantations)
                         doneFunc:function(event)
                         {
                             if(event.type!='cordeau')
-                                return "Que faites vous ?"
+                                return "Que faites-vous ?"
                             if(event.cordeau == null)
                                 return "Il faut 'mettre' du cordeau, pas l'enlever"
                             return true
@@ -287,7 +287,7 @@ function getKnowledgeGraph(plantations)
                     knowledges['cordeau_optimise'] =
                     {
                         name:'optimiser le cordeau',
-                        tip:"Placer un ligne de cordeau de longueur 3",
+                        tip:"Placer une ligne de cordeau de longueur 3",
                         doneFunc:function(event)
                         {
                             return true
@@ -300,7 +300,7 @@ function getKnowledgeGraph(plantations)
                     doneFunc:function(event)
                     {
                         if(event.type!='plant' && event.type!='dig' && event.type!='bury')
-                            return "Il faut planter ! Que faites vous ?"
+                            return "Il faut planter ! Que faites-vous ?"
                         if(event.cordeau == null)
                             return "SUR le cordage !!"
                         console.log( event.potagen.cordeau.array)
