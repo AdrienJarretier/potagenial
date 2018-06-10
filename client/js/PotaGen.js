@@ -123,7 +123,7 @@ class PotaGen
                 durt.water -= 1
                 tthis.sendEvent('water',plant.x,plant.y)
                 let adder = 1/plant.cycles
-                plant.grow += adder*waterRatio
+                plant.grow = Math.min(plant.grow+adder*waterRatio,1)
                 tthis.sendEvent('grow',plant.x,plant.y)
             },tim)
         }
