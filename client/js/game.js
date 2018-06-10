@@ -187,8 +187,8 @@ function loadGame() {
 
     var planteMap = {
       plante: [0, 1, 2],
-      feuille: [0, 4],
-      tige: [0, 3],
+      feuille: [0, 1, 4],
+      tige: [0, 1, 3],
     }
 
     let fruitMap = {
@@ -392,8 +392,7 @@ function loadGame() {
       tractorBreath()
   }
 
-  function drawPotager()
-  {
+  function drawPotager() {
     for (let x = 0; x < POTAGER_COLS; ++x) {
       for (let y = 0; y < POTAGER_ROWS; ++y) {
         let seed = potaGen.seed.xy_map[x][y]
@@ -633,7 +632,7 @@ function loadGame() {
 
 
     const RESET_BUTTON_SCALE = 0.45;
-    const RESET_BUTTON_Y_OFFSET = (- 80 * RESET_BUTTON_SCALE)/4;
+    const RESET_BUTTON_Y_OFFSET = (-80 * RESET_BUTTON_SCALE) / 4;
 
     console.log(RESET_BUTTON_Y_OFFSET);
 

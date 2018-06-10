@@ -158,7 +158,7 @@ class PotaGen
                     {
                         if(water >= 1)
                         {
-                            let tim = Math.random()*3*1000
+                            let tim = Math.random()*1*1000
                             growDurtPlant.call(this,plant,durt,tim)
                         }
                     }

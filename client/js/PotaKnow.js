@@ -290,7 +290,30 @@ function getKnowledgeGraph(plantations)
                         tip:"Placer une ligne de cordeau de longueur 3",
                         doneFunc:function(event)
                         {
-                            return true
+                            if(event.type != 'cordeau')
+                                return 'Que faites-vous ? Utilisez le cordeau !'
+                            for(let x=1;x<event.potagen.width-1;++x)
+                            {
+                                for(let y=1;y<event.potagen.height-1;++y)
+                                {
+                                    let cordeau = event.potagen.cordeau.xy_map[x][y]=='cordeau'
+                                    let left = event.potagen.cordeau.xy_map[x-1][y]=='cordeau'
+                                    let right = event.potagen.cordeau.xy_map[x+1][y]=='cordeau'
+                                    let up = event.potagen.cordeau.xy_map[x][y-1]=='cordeau'
+                                    let down = event.potagen.cordeau.xy_map[x][y+1]=='cordeau'
+
+                                    let horiz = cordeau && left && right
+                                    let verti = cordeau && up && down
+
+                                    if((verti && left) || (verti && right))
+                                        return "Attention Picasso, ne partez pas dans tout les sens"
+                                    if((horiz && up) || (horiz && down))
+                                        return "Attention Picasso, ne partez pas dans tout les sens"
+                                    if(verti || horiz)
+                                        return true
+                                }
+                            }
+                            return false
                         }
                     }
                 knowledges['planter_preparation'] =
@@ -506,7 +529,7 @@ class PotaKnow
             'Bravo vous savez',
             'Vous comprenez maintenant comment',
             'Vous savez maintenant comment',
-            'Félicitation vous avez appris à',
+            'Félicitations vous avez appris à',
             'Très bien, vous comprenez à présent comment',
             ])
         this.say(phrase+' '+task.name)
