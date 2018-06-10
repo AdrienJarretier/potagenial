@@ -8,6 +8,33 @@ var backSound;
 
 window.onload = function() {
 
+  var fontFace = new FontFace('AlphaFridgeMagnets', 'url(assets/fonts/AlphaFridgeMagnets.ttf)');
+
+  document.fonts.add(fontFace);
+
+  fontFace.load();
+
+  fontFace.loaded.then((fontFace) => {
+    // This is where you can declare a new font-family, because the font is now loaded and ready.  
+    console.info('Current status', fontFace.status);
+    console.log(fontFace.family, 'loaded successfully.');
+
+    loadGame();
+
+    // Throw an error if loading wasn't successful
+  }, (fontFace) => {
+    console.error('Current status', fontFace.status);
+  });
+
+
+
+
+
+}
+
+
+function loadGame() {
+
   // -----------------------------------------------------------------------
   // --------------------------------------------------------- INIT --------
 
@@ -31,16 +58,16 @@ window.onload = function() {
   var potaTool = new PotaTool(potaGen);
 
   var queue = async.queue(function(str, func) {
-    if(queue.length()>0)
-        str += '...'
+    if (queue.length() > 0)
+      str += '...'
     talkerInfos.context = str
     if (talker != null)
       talker.destroy()
     talker = new Phasetips(game, talkerInfos)
     talker.showTooltip()
-    let lRate = Math.min(Math.floor((str.length/110)*9),8)+1
-    console.log('0'+lRate+'-Old man speaking about life')
-    oldTractorSpeacker.play('0'+lRate+'-Old man speaking about life');
+    let lRate = Math.min(Math.floor((str.length / 110) * 9), 8) + 1
+    console.log('0' + lRate + '-Old man speaking about life')
+    oldTractorSpeacker.play('0' + lRate + '-Old man speaking about life');
     tractorSpeak()
 
     setTimeout(func, str.length * 60);
@@ -48,11 +75,12 @@ window.onload = function() {
   }, 1);
 
   var lastStr = '';
+
   function speak(str) {
-    if(queue.length()==0)
-        lastStr = ''
-    if(lastStr != str)
-        queue.push(str)
+    if (queue.length() == 0)
+      lastStr = ''
+    if (lastStr != str)
+      queue.push(str)
     lastStr = str
   }
 
@@ -66,8 +94,7 @@ window.onload = function() {
       }
   }
 
-  function newTask(str)
-  {
+  function newTask(str) {
     currentTaskInfos.context = str
     if (currentTask != null)
       currentTask.destroy()
@@ -78,13 +105,13 @@ window.onload = function() {
   potaKnow = new PotaKnow(potaGen, potaTool, speak, doneSpeaking, newTask);
   potaGen.register('phaser', null, potager_update)
 
-  updateCycle = function(){potaGen.newCycle.call(potaGen)}
+  updateCycle = function() { potaGen.newCycle.call(potaGen) }
 
-  potaKnow.register(function(task){
-    if(task.hasOwnProperty('last'))
-        game.sound.play('win',0.3)
+  potaKnow.register(function(task) {
+    if (task.hasOwnProperty('last'))
+      game.sound.play('win', 0.3)
     else
-        taskDoneSpeacker.play()
+      taskDoneSpeacker.play()
   });
 
   // -----------------------------------------------------------------------
@@ -92,11 +119,11 @@ window.onload = function() {
   function potager_update(event) {
 
     let audioMap = {
-        'dig':'dig',
-        'bury':'bury',
-        'water':'water',
-        'plant':'pickedPlant',
-        'pickedPlant':'pickedPlant',
+      'dig': 'dig',
+      'bury': 'bury',
+      'water': 'water',
+      'plant': 'pickedPlant',
+      'pickedPlant': 'pickedPlant',
     }
 
     console.log(event)
@@ -107,29 +134,25 @@ window.onload = function() {
     let plant = event.plant;
     let water = durt.water
 
-    if(audioMap.hasOwnProperty(type))
-    {
-        game.sound.play(audioMap[type])
+    if (audioMap.hasOwnProperty(type)) {
+      game.sound.play(audioMap[type])
     }
 
     if (type == 'dig' || type == 'bury') {
       let ret = createHoles(potaGen, x, y, [])
 
       if (plant.name != 'NO PLANT') {
-        drawPlant(plant,durt,x,y)
+        drawPlant(plant, durt, x, y)
       }
-    }
-    else if (type == 'plant' || type=='grow' || type=='pickedPlant') {
-        drawPlant(plant,durt,x,y)
-    }
-    else if(type=='cordeau')
-        createCordeau(potaGen, x, y, [])
-    else if(type=='water')
-    {
-        if(water==0)
-            setEau(-1,x,y)
-        else
-            setEau(water-1,x,y)
+    } else if (type == 'plant' || type == 'grow' || type == 'pickedPlant') {
+      drawPlant(plant, durt, x, y)
+    } else if (type == 'cordeau')
+      createCordeau(potaGen, x, y, [])
+    else if (type == 'water') {
+      if (water == 0)
+        setEau(-1, x, y)
+      else
+        setEau(water - 1, x, y)
     }
     /*
     else if(type == 'water')
@@ -143,14 +166,12 @@ window.onload = function() {
   }
   // -----------------------------------------------------------------------
   // ------------------------------------------------------ SETTILE --------
-  function drawPlant(plant,durt,x,y)
-  {
-    if(plant.name == 'NO PLANT')
-    {
-        setRacine(-1, x, y)
-        setFruit(-1,x,y)
-        setPlante(-1, x, y)
-        return
+  function drawPlant(plant, durt, x, y) {
+    if (plant.name == 'NO PLANT') {
+      setRacine(-1, x, y)
+      setFruit(-1, x, y)
+      setPlante(-1, x, y)
+      return
     }
     var seedMap = {
       potato: racines_patate_0,
@@ -158,18 +179,18 @@ window.onload = function() {
     }
 
     var doneSeedMap = {
-        potato:1,
-        seed:3,
+      potato: 1,
+      seed: 3,
     }
 
     var planteMap = {
-        plante:[0,1,2],
-        feuille:[0,4],
-        tige:[0,3],
+      plante: [0, 1, 2],
+      feuille: [0, 4],
+      tige: [0, 3],
     }
 
     let fruitMap = {
-        tomato:0
+      tomato: 0
     }
 
     let grow = plant.grow
@@ -179,23 +200,22 @@ window.onload = function() {
     let seedDone = doneSeedMap[plant.seed];
     let seeSeed = durt.level >= plant.level
     if (seeSeed)
-        if(plant.grow == 1)
-            setRacine(seedDone, x, y)
-        else
-            setRacine(seed, x, y)
+      if (plant.grow == 1)
+        setRacine(seedDone, x, y)
+    else
+      setRacine(seed, x, y)
     else
       setRacine(-1, x, y)
 
     let plante = planteMap[plantName]
-    let mapId = Math.floor(grow*(plante.length-1))
+    let mapId = Math.floor(grow * (plante.length - 1))
     let planteId = plante[mapId]
     setPlante(planteId, x, y)
 
-    if(plant.hasOwnProperty('fruit') && plant.grow == 1)
-    {
-        let fruit = plant.fruit
-        let fruitId = fruitMap[fruit]
-        setFruit(fruitId,x,y)
+    if (plant.hasOwnProperty('fruit') && plant.grow == 1) {
+      let fruit = plant.fruit
+      let fruitId = fruitMap[fruit]
+      setFruit(fruitId, x, y)
     }
   }
   // ---------------------------------
@@ -360,6 +380,7 @@ window.onload = function() {
   }
 
   var speakCount = 0
+
   function tractorSpeak() {
     if (speakCount < 5) {
       speakCount++;
@@ -409,17 +430,17 @@ window.onload = function() {
 
     game.load.spritesheet('cordeau', 'assets/cordeau.png', CELL_SIZE, CELL_SIZE);
 
-    game.load.audio('dig','assets/sound/dig.mp3')
-    game.load.audio('bury','assets/sound/bury.mp3')
-    game.load.audio('water','assets/sound/water.mp3')
-    game.load.audio('pickedPlant','assets/sound/pickedPlant.mp3')
-    game.load.audio('taskDone','assets/sound/taskDone.mp3')
-    game.load.audio('win','assets/sound/win.mp3')
+    game.load.audio('dig', 'assets/sound/dig.mp3')
+    game.load.audio('bury', 'assets/sound/bury.mp3')
+    game.load.audio('water', 'assets/sound/water.mp3')
+    game.load.audio('pickedPlant', 'assets/sound/pickedPlant.mp3')
+    game.load.audio('taskDone', 'assets/sound/taskDone.mp3')
+    game.load.audio('win', 'assets/sound/win.mp3')
 
     // IMPORT OLD MAN SOUND
     game.load.audioSprite('old_tractor', 'assets/sound/oldMan/old_tractor.mp3', 'assets/sound/oldMan/old_tractor.json');
 
-    game.load.audio('background','assets/sound/background.wav')
+    game.load.audio('background', 'assets/sound/background.wav')
 
 
   }
@@ -509,7 +530,7 @@ window.onload = function() {
   // -------------------
   function create() {
 
-    backSound = game.add.audio('background',0.1,true)
+    backSound = game.add.audio('background', 0.1, true)
     backSound.play()
 
     oldTractorSpeacker = game.add.audioSprite('old_tractor');
@@ -575,8 +596,8 @@ window.onload = function() {
     marker.drawRect(0, 0, 64, 64);
 
     // -- Setup tools
-    for (let k in potaTool.tool) 
-      if(parseInt(k)!=4)
+    for (let k in potaTool.tool)
+      if (parseInt(k) != 4)
         outilsMap.putTile(k, parseInt(k) + 1, POTAGER_ROWS + 2, outilsLayer)
 
     // -- Setup potager
@@ -615,22 +636,20 @@ window.onload = function() {
       }
     }
 
-    for(let x=0;x<POTAGER_COLS;++x)
-    {
-        for(let y=0;y<POTAGER_ROWS;++y)
-        {
-            let seed = potaGen.seed.xy_map[x][y]
-            let durt = potaGen.durt.xy_map[x][y]
-            let cordeau = potaGen.cordeau.xy_map[x][y]
+    for (let x = 0; x < POTAGER_COLS; ++x) {
+      for (let y = 0; y < POTAGER_ROWS; ++y) {
+        let seed = potaGen.seed.xy_map[x][y]
+        let durt = potaGen.durt.xy_map[x][y]
+        let cordeau = potaGen.cordeau.xy_map[x][y]
 
-            createHoles(potaGen, x, y, [])
-            drawPlant(seed,durt,x,y)
-            createCordeau(potaGen, x, y, [])
-            if(durt.water==0)
-                setEau(-1,x,y)
-            else
-                setEau(durt.water-1,x,y)
-        }
+        createHoles(potaGen, x, y, [])
+        drawPlant(seed, durt, x, y)
+        createCordeau(potaGen, x, y, [])
+        if (durt.water == 0)
+          setEau(-1, x, y)
+        else
+          setEau(durt.water - 1, x, y)
+      }
     }
 
     tractorBreath();
@@ -639,7 +658,7 @@ window.onload = function() {
 
     talkerInfos = {
       context: "BANDE DE CONS",
-      font: "VASCON",
+      font: "AlphaFridgeMagnets",
       fontSize: 27,
       width: 180,
       fontStroke: "#8a3c32",
@@ -655,7 +674,7 @@ window.onload = function() {
 
     currentTaskInfos = {
       context: "BANDE DE CONS",
-      font: "VASCON",
+      font: "AlphaFridgeMagnets",
       fontSize: 18,
       width: 180,
       fontStroke: "#005511",
@@ -664,8 +683,8 @@ window.onload = function() {
       strokeColor: 0x005511,
       strokeWeight: 5,
       roundedCornersRadius: 0,
-      y: CELL_SIZE*(tROWS-2),
-      x: CELL_SIZE*(POTAGER_COLS+1),
+      y: CELL_SIZE * (tROWS - 2),
+      x: CELL_SIZE * (POTAGER_COLS + 1),
       disableInputEvents: true,
       alwaysOn: true
     }
