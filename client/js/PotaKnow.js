@@ -354,6 +354,16 @@ class PotaKnow
         this.taskInTesting = false
     }
 
+    resetModel()
+    {
+        localStorage.removeItem('profil')
+        for(let t in this.knowledges)
+            this.knowledges[t].done = false
+        this.actTask = null
+        this.taskInTesting = false
+        clearTimeout(this.tipTimeout)
+    }
+
     loadProfil()
     {
         let loaded = localStorage.getItem('profil')

@@ -392,6 +392,25 @@ function loadGame() {
       tractorBreath()
   }
 
+  function drawPotager()
+  {
+    for (let x = 0; x < POTAGER_COLS; ++x) {
+      for (let y = 0; y < POTAGER_ROWS; ++y) {
+        let seed = potaGen.seed.xy_map[x][y]
+        let durt = potaGen.durt.xy_map[x][y]
+        let cordeau = potaGen.cordeau.xy_map[x][y]
+
+        createHoles(potaGen, x, y, [])
+        drawPlant(seed, durt, x, y)
+        createCordeau(potaGen, x, y, [])
+        if (durt.water == 0)
+          setEau(-1, x, y)
+        else
+          setEau(durt.water - 1, x, y)
+      }
+    }
+  }
+
   // -----------------------------------------------------------------------
   // --------------------------------------------------------- GAME --------
 
@@ -613,16 +632,20 @@ function loadGame() {
     marker.drawRect(0, 0, 64, 64);
 
 
-    const RESET_BUTTON_SCALE = 0.5;
-    const RESET_BUTTON_Y_OFFSET = (- 80 * RESET_BUTTON_SCALE)/2;
+    const RESET_BUTTON_SCALE = 0.45;
+    const RESET_BUTTON_Y_OFFSET = (- 80 * RESET_BUTTON_SCALE)/4;
 
     console.log(RESET_BUTTON_Y_OFFSET);
 
     let resetButton = game.add.button(game.world.width - 300 * RESET_BUTTON_SCALE + RESET_BUTTON_Y_OFFSET, game.world.height - 80 * RESET_BUTTON_SCALE + RESET_BUTTON_Y_OFFSET, 'resetButton',
       function() {
-
-        console.log('click');
-
+        if (confirm('Voulez-vous réellement réinitialiser votre apprentissage ?')) {
+          potaGen.resetModel()
+          potaKnow.resetModel()
+          drawPotager()
+          potaKnow.nextKnowledge()
+          //queue.kill()
+        }
       });
 
     resetButton.setScaleMinMax(RESET_BUTTON_SCALE, RESET_BUTTON_SCALE, RESET_BUTTON_SCALE, RESET_BUTTON_SCALE);
@@ -667,21 +690,7 @@ function loadGame() {
       }
     }
 
-    for (let x = 0; x < POTAGER_COLS; ++x) {
-      for (let y = 0; y < POTAGER_ROWS; ++y) {
-        let seed = potaGen.seed.xy_map[x][y]
-        let durt = potaGen.durt.xy_map[x][y]
-        let cordeau = potaGen.cordeau.xy_map[x][y]
-
-        createHoles(potaGen, x, y, [])
-        drawPlant(seed, durt, x, y)
-        createCordeau(potaGen, x, y, [])
-        if (durt.water == 0)
-          setEau(-1, x, y)
-        else
-          setEau(durt.water - 1, x, y)
-      }
-    }
+    drawPotager()
 
     tractorBreath();
 

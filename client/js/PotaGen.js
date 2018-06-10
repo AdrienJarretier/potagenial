@@ -68,20 +68,17 @@ class PotaGen
         }
     }
     // -------------------------------------------
-    constructor(w,h)
+    initPotager()
     {
-        this.width = w
-        this.height = h
-        this.initVars()
 
         let loaded = this.loadPotager()
 
-        for(let i=0;i<w;++i)
+        for(let i=0;i<this.width;++i)
         {
             this.durt.xy_map[i] = {}
             this.seed.xy_map[i] = {}
             this.cordeau.xy_map[i] = {}
-            for(let j=0;j<h;++j)
+            for(let j=0;j<this.height;++j)
             {
                 if(loaded!=null)
                 {
@@ -111,6 +108,20 @@ class PotaGen
                 this.cordeau.array.push(this.cordeau.xy_map[i][j])
             }
         }
+    }
+    // -------------------------------------------
+    constructor(w,h)
+    {
+        this.width = w
+        this.height = h
+        this.initVars()
+        this.initPotager()
+    }
+    // -------------------------------------------
+    resetModel()
+    {
+        localStorage.removeItem('potager')
+        this.initPotager()
     }
     // -------------------------------------------
     newCycle()
