@@ -79,8 +79,11 @@ window.onload = function() {
 
   updateCycle = function(){potaGen.newCycle.call(potaGen)}
 
-  potaKnow.register(function(){
-    taskDoneSpeacker.play()
+  potaKnow.register(function(task){
+    if(task.hasOwnProperty('last'))
+        taskDoneSpeacker.play()
+    else
+        taskDoneSpeacker.play()
   });
 
   // -----------------------------------------------------------------------
@@ -120,6 +123,13 @@ window.onload = function() {
     }
     else if(type=='cordeau')
         createCordeau(potaGen, x, y, [])
+    else if(type=='water')
+    {
+        if(water==0)
+            setEau(-1,x,y)
+        else
+            setEau(water,x,y)
+    }
     /*
     else if(type == 'water')
     {
@@ -327,6 +337,10 @@ window.onload = function() {
     setTile(racinesMap, tileId, x + 1, y + 1, racinesLayer)
   }
 
+  function setEau(tileId, x, y) {
+    setTile(eauMap, tileId, x + 1, y + 1, eauLayer)
+  }
+
   function setPlante(tileId, x, y) {
     setTile(plantesMap, tileId, x + 1, y + 1, plantesLayer)
   }
@@ -388,6 +402,8 @@ window.onload = function() {
     // SPRITE INFOPLANTE
     game.load.spritesheet('fruits', 'assets/fruits.png', CELL_SIZE, CELL_SIZE);
     // SPRITE EAU
+    game.load.spritesheet('water', 'assets/water.png', CELL_SIZE, CELL_SIZE);
+
     game.load.spritesheet('tractorAnim', 'assets/tractorAnim.png', CELL_SIZE, CELL_SIZE);
 
     game.load.spritesheet('cordeau', 'assets/cordeau.png', CELL_SIZE, CELL_SIZE);
@@ -426,6 +442,7 @@ window.onload = function() {
   var tranchesLayer;
   var trousLayer;
   var racinesLayer;
+  var eauLayer;
   var cordeauLayer;
   var plantesLayer;
   var fruitsLayer;
@@ -519,6 +536,11 @@ window.onload = function() {
     racinesMap.addTilesetImage('racines');
     racinesLayer = racinesMap.create(
       'racines', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
+
+    eauMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
+    eauMap.addTilesetImage('water');
+    eauLayer = eauMap.create(
+      'water', POTAGER_COLS + 2, POTAGER_ROWS + 2, CELL_SIZE, CELL_SIZE);
 
     cordeauMap = game.add.tilemap(null, CELL_SIZE, CELL_SIZE);
     cordeauMap.addTilesetImage('cordeau');

@@ -107,6 +107,8 @@ class PotaGen
                     console.log(water,needWater)
                     if(water >= needWater)
                     {
+                        durt.water -= 1
+                        this.sendEvent('water',x,y)
                         let adder = 1/plant.cycles
                         plant.grow += adder
                         this.sendEvent('grow',x,y)
