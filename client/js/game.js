@@ -702,7 +702,7 @@ function loadGame() {
     talkerInfos = {
       context: "BANDE DE CONS",
       font: "AlphaFridgeMagnets",
-      fontSize: 25,
+      fontSize: 24,
       width: 180,
       fontStroke: "#8a3c32",
       fontStrokeThickness: 0,
