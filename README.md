@@ -2,9 +2,21 @@
 
 Le projet est un serious game en javascript ayant pour objectif d'enseigner certaines bases de connaissances pour la réalisation d'un potager aux plus jeunes.
 
-Le jeu peut simplement être lancé en ouvrant [client/index.html](https://github.com/AdrienJarretier/potagenial/blob/master/client/index.html) dans un navigateur.
+## Installation
 
-La partie serveur est simplement là pour héberger et servir l'application entièrement statique avec l'aide de nodejs et le paquet express.
+```
+cd server
+npm install
+```
+
+## Exécution
+
+
+Démarrer le serveur avec `node .`
+
+Le jeu peut simplement être lancé en ouvrant l'adresse [http://127.0.0.1:7650/](http://127.0.0.1:7650/) dans un navigateur, si le port par défaut est tjours 7650,
+celui ci peut être modifié de manière parfaite sâle dans le code de [server/index.js](https://github.com/AdrienJarretier/potagenial/blob/68ff58714490810db87b98ee83c4561525929cb3/server/index.js#L8)
+
 
 <p align="center">
 Trailer ! <br>
@@ -18,3 +30,4 @@ Trailer ! <br>
 
 - Castaneda Hugo
 - Jarretier-Yuste Adrien
+2
