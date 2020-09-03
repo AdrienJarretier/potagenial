@@ -53,6 +53,13 @@ function getKnowledgeGraph(plantations)
                         init:function(potaGen,done)
                         {
                             this.say('Bienvenue à vous dans Pota genial, votre jeu de gestion et d\'apprentissage')
+                            this.say("L'objectif du jeu est d'apprendre à mettre en place et gérer son potager")
+                            this.say("Pour ce faire je serais à vos côtés pendant le jeu")
+                            this.say("Je vous apprendrai les concepts basiques du maintient d'un potager et de la culture des légumes")
+                            this.say("Si vous ne savez pas comment faire pour terminer une tâche...")
+                            this.say("je vous donnerai une astuce comme celle qui suit")
+                            this.say("Suiviez bien mes instructions,")
+                            this.say("j'ai plein d'informations intéressantes à vous donner")
                             done()
                         },
                         doneFunc:function(event)

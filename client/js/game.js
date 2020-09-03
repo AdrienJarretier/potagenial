@@ -70,7 +70,7 @@ function loadGame() {
     oldTractorSpeacker.play('0' + lRate + '-Old man speaking about life');
     tractorSpeak()
 
-    setTimeout(func, str.length * 60);
+    setTimeout(func, str.length * 100);
 
   }, 1);
 
